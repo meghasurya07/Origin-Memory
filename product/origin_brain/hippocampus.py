@@ -216,17 +216,32 @@ class HippocampalEngine:
             
             # Encoding-order recency: position in temporal index (later = higher)
             order_recency = 0.5
+            total_items = max(len(self._temporal_index), 1)
             for idx, (ts, tid) in enumerate(self._temporal_index):
                 if tid == mem_id:
-                    order_recency = (idx + 1) / max(len(self._temporal_index), 1)
+                    order_recency = (idx + 1) / total_items
                     break
             
-            # Blend: 50% wall-clock + 50% encoding order
-            recency = 0.5 * wall_recency + 0.5 * order_recency
+            # Blend: 40% wall-clock + 60% encoding order (order matters more for same-session)
+            recency = 0.4 * wall_recency + 0.6 * order_recency
             salience_score = memory.salience
             
-            # Weighted score: 0.6 * semantic + 0.2 * recency + 0.2 * salience
-            final_score = 0.6 * semantic_similarity + 0.2 * recency + 0.2 * salience_score
+            # Primacy bonus: first few items get rehearsal advantage
+            # (simulates working memory rehearsal of early list items)
+            primacy_bonus = 0.0
+            for idx, (ts, tid) in enumerate(self._temporal_index):
+                if tid == mem_id:
+                    if idx < 3:  # First 3 items get primacy boost
+                        primacy_bonus = 0.3 * (1.0 - idx / 3.0)
+                    break
+            
+            # Weighted score: 0.45 semantic + 0.30 recency + 0.15 salience + 0.10 primacy
+            final_score = (
+                0.45 * semantic_similarity 
+                + 0.30 * recency 
+                + 0.15 * salience_score 
+                + 0.10 * primacy_bonus
+            )
             
             results.append((memory, final_score))
             

@@ -111,6 +111,10 @@ class Brain:
         # v0.5: Neuromodulation — ACh/DA/NE mode switching
         self.neuromodulation = NeuromodulationEngine(config=NeuromodulationConfig())
 
+        # v0.5: Synaptic plasticity — STDP + Hebbian connection learning
+        from .synaptic_plasticity import SynapticPlasticityEngine, PlasticityConfig
+        self.plasticity = SynapticPlasticityEngine(config=PlasticityConfig())
+
         # v0.5: Persistent storage
         if self.config.storage_path:
             from .storage import SQLiteStorage
@@ -359,6 +363,26 @@ class Brain:
                 
         # 6. Metamemory assessment
         confidence = self.metamemory.assess(query, ranked_results)
+        
+        # 6b. Synaptic plasticity: co-recalled memories strengthen connections
+        episodic_results = [
+            r for r in ranked_results if isinstance(r.memory, EpisodicMemory)
+        ]
+        for i, r1 in enumerate(episodic_results):
+            for r2 in episodic_results[i+1:]:
+                # Find or create synapse between co-recalled memories
+                existing = self.plasticity.find_synapses(
+                    source_id=r1.memory.id, target_id=r2.memory.id
+                )
+                if existing:
+                    syn = existing[0]
+                else:
+                    syn = self.plasticity.create_synapse(
+                        r1.memory.id, r2.memory.id, initial_weight=0.3
+                    )
+                # Co-retrieval = Hebbian strengthening
+                co_activation = min(r1.relevance_score, r2.relevance_score)
+                self.plasticity.hebbian_update(syn.id, co_activation)
         
         # 7. Prospective memory triggers
         trigger_context = self.context_buffer.copy()
