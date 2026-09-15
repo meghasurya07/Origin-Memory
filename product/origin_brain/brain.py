@@ -119,6 +119,10 @@ class Brain:
         from .engram import EngramEngine, EngramConfig
         self.engram_engine = EngramEngine(config=EngramConfig())
 
+        # v0.5: Cognitive map — successor representation for memory navigation
+        from .cognitive_map import CognitiveMapEngine, CognitiveMapConfig
+        self.cognitive_map = CognitiveMapEngine(config=CognitiveMapConfig())
+
         # v0.5: Persistent storage
         if self.config.storage_path:
             from .storage import SQLiteStorage
@@ -372,6 +376,11 @@ class Brain:
         for res in ranked_results:
             if isinstance(res.memory, EpisodicMemory):
                 self.engram_engine.reactivate(res.memory.id)
+        
+        # 5e. Cognitive map: record recall transitions
+        for res in ranked_results:
+            if isinstance(res.memory, EpisodicMemory):
+                self.cognitive_map.on_recall(res.memory.id)
                 
         # 6. Metamemory assessment
         confidence = self.metamemory.assess(query, ranked_results)

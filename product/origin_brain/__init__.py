@@ -53,6 +53,7 @@ from .neuromodulation import NeuromodulationEngine, NeuromodulationConfig, Brain
 from .synaptic_plasticity import SynapticPlasticityEngine, PlasticityConfig, Synapse, SynapticTag
 from .client import OriginBrainClient, MemoryItem
 from .engram import EngramEngine, EngramConfig, Engram, EngramCell, EngramState
+from .cognitive_map import CognitiveMapEngine, CognitiveMapConfig
 
 __all__ = [
     # Core API
