@@ -8,7 +8,7 @@ encode, consolidate, retrieve, and strategically forget information the way
 the human brain does.
 """
 
-__version__ = "0.4.1"
+__version__ = "0.5.0"
 
 # Core
 from .models import (
