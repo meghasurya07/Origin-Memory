@@ -111,6 +111,15 @@ class Brain:
         # v0.5: Neuromodulation — ACh/DA/NE mode switching
         self.neuromodulation = NeuromodulationEngine(config=NeuromodulationConfig())
 
+        # v0.5: Persistent storage
+        if self.config.storage_path:
+            from .storage import SQLiteStorage
+            self._storage = SQLiteStorage(db_path=self.config.storage_path)
+            # Auto-load existing memories on init
+            self._load_from_storage()
+        else:
+            self._storage = None
+
         # Backward-compatible context buffer (delegates to working memory)
         self.context_buffer: Dict[str, Any] = {}
 
@@ -272,6 +281,9 @@ class Brain:
 
         # 11. Decay neuromodulators toward baseline (transient effects)
         self.neuromodulation.decay_to_baseline()
+
+        # 12. Persist to storage (if configured)
+        self._persist_memory(memory)
 
         return EncodeResult(
             memory=memory,
@@ -643,3 +655,46 @@ class Brain:
             f"{len(state.get('semantic_memories', {}))} semantic, "
             f"{len(state.get('procedural_memories', {}))} procedural"
         )
+
+    # ── Persistence ──────────────────────────────────────────────────
+
+    def save(self) -> int:
+        """
+        Persist all current episodic memories to storage.
+        
+        Returns:
+            Number of memories saved
+        """
+        if self._storage is None:
+            logger.warning("No storage backend configured (set storage_path in BrainConfig)")
+            return 0
+        
+        count = 0
+        for mem in self.hippocampus._episodic_store.values():
+            self._storage.save_memory(mem)
+            count += 1
+        
+        logger.info(f"Saved {count} memories to storage")
+        return count
+
+    def _persist_memory(self, memory: EpisodicMemory):
+        """Persist a single memory to storage (if configured)."""
+        if self._storage is not None:
+            self._storage.save_memory(memory)
+
+    def _load_from_storage(self):
+        """Load all memories from storage into hippocampus."""
+        if self._storage is None:
+            return
+        
+        memories = self._storage.load_all_memories()
+        for mem in memories:
+            self.hippocampus._episodic_store[mem.id] = mem
+            # Rebuild sparse embedding for retrieval
+            words = set(mem.content.lower().split())
+            self.hippocampus._embeddings[mem.id] = words
+            # Rebuild TF-IDF index
+            self.hippocampus._semantic_engine.add_document(mem.id, mem.content)
+        
+        if memories:
+            logger.info(f"Loaded {len(memories)} memories from storage")

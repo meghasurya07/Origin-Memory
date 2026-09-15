@@ -161,3 +161,6 @@ class BrainConfig(BaseModel):
     archival_backend: Literal['silicon', 'dna'] = 'silicon'
     embedding_model: str = 'text-embedding-3-small'
     embedding_dimension: int = 1536
+    # v0.5: Persistent storage path (None = in-memory only)
+    storage_path: Optional[str] = None
+

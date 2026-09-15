@@ -102,3 +102,33 @@ def test_brain_with_config_object():
     config = BrainConfig(agent_id="config-brain", embedding_dimension=64)
     brain = Brain(config=config)
     assert brain.agent_id == "config-brain"
+
+
+def test_brain_persistence_roundtrip(tmp_path):
+    """Encode memories, close brain, reopen from same SQLite — memories persist."""
+    db_path = str(tmp_path / "test_brain.db")
+    
+    # Brain 1: encode memories
+    brain1 = Brain(config=BrainConfig(
+        agent_id="persist-test", 
+        embedding_dimension=64,
+        storage_path=db_path
+    ))
+    brain1.encode("The Krebs cycle produces ATP in mitochondria")
+    brain1.encode("Shakespeare wrote Hamlet about a Danish prince")
+    assert brain1.episodic_count == 2
+    
+    # Brain 2: reopen from same database
+    brain2 = Brain(config=BrainConfig(
+        agent_id="persist-test",
+        embedding_dimension=64,
+        storage_path=db_path
+    ))
+    
+    # Memories should be loaded automatically
+    assert brain2.episodic_count == 2
+    
+    # Should be able to recall them
+    results = brain2.recall("Krebs ATP")
+    assert len(results.results) > 0
+    assert "krebs" in results.results[0].memory.content.lower() or "atp" in results.results[0].memory.content.lower()
