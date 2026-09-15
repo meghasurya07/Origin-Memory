@@ -51,6 +51,7 @@ from .storage import StorageBackend, InMemoryStorage, SQLiteStorage
 from .neurogenesis import NeurogenesisEngine, NeurogenesisConfig, MemoryNeuron, NeuronState
 from .neuromodulation import NeuromodulationEngine, NeuromodulationConfig, BrainMode
 from .synaptic_plasticity import SynapticPlasticityEngine, PlasticityConfig, Synapse, SynapticTag
+from .client import OriginBrainClient, MemoryItem
 
 __all__ = [
     # Core API
