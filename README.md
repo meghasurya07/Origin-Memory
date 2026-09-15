@@ -2,9 +2,9 @@
 
 > **The biggest problem in AI is Memory.** AI agents are stateless — they forget everything between sessions. Origin Brain is a cognitive memory system that thinks, forgets, consolidates, and reconstructs memories the way a human brain does.
 
-[![Tests](https://img.shields.io/badge/tests-214%20passing-brightgreen)]()
-[![HCSI](https://img.shields.io/badge/HCSI-0.80-blue)]()
-[![Version](https://img.shields.io/badge/version-0.5-orange)]()
+[![Tests](https://img.shields.io/badge/tests-237%20passing-brightgreen)]()
+[![HCSI](https://img.shields.io/badge/HCSI-1.00-gold)]()
+[![Version](https://img.shields.io/badge/version-0.5.1-orange)]()
 [![License](https://img.shields.io/badge/license-proprietary-red)]()
 
 ---
@@ -105,14 +105,14 @@ print(f"Pruned: {sleep_report.memories_pruned}")
 
 | Metric | Value |
 |:-------|:------|
-| Source modules | 24 |
-| Source lines | 6,882 |
-| Test files | 14 |
-| Tests passing | **214** |
-| Research documents | **51** |
-| Experiments | 20+ (17 passing) |
-| HCSI Score | **0.80** (4/5 benchmarks) |
-| Version | **v0.5** |
+| Source modules | 25 |
+| Source lines | 7,500+ |
+| Test files | 16 |
+| Tests passing | **237** |
+| Research documents | **52** |
+| Experiments | 20+ (all passing) |
+| HCSI Score | **1.00** (5/5 benchmarks) |
+| Version | **v0.5.1** |
 
 ---
 
@@ -126,8 +126,8 @@ print(f"Pruned: {sleep_report.memories_pruned}")
 | DRM False Memory | Schema-filled reconstructions | ✅ PASS |
 | Testing Effect | stability 12.57 vs 3.64 | ✅ PASS |
 | Working Memory Capacity | 5-7 items, priority displacement | ✅ PASS |
-| Serial Position Effect | Recency 0.750 vs Middle 0.788 | ❌ FAIL |
-| **HCSI** | **0.80** | **4/5** |
+| Serial Position Effect | Recency 0.720 > Middle 0.706 | ✅ PASS |
+| **HCSI** | **1.00** | **5/5** |
 
 ### Competitive Benchmark (vs VectorDB/Mem0-like)
 
