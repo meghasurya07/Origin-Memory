@@ -115,6 +115,10 @@ class Brain:
         from .synaptic_plasticity import SynapticPlasticityEngine, PlasticityConfig
         self.plasticity = SynapticPlasticityEngine(config=PlasticityConfig())
 
+        # v0.5: Engram tracking — memory trace formation
+        from .engram import EngramEngine, EngramConfig
+        self.engram_engine = EngramEngine(config=EngramConfig())
+
         # v0.5: Persistent storage
         if self.config.storage_path:
             from .storage import SQLiteStorage
@@ -289,6 +293,9 @@ class Brain:
         # 12. Persist to storage (if configured)
         self._persist_memory(memory)
 
+        # 13. Allocate engram trace (neural ensemble for this memory)
+        self.engram_engine.allocate_engram(memory.id)
+
         return EncodeResult(
             memory=memory,
             action='encoded',
@@ -360,6 +367,11 @@ class Brain:
                 inhibition_rate=0.03,
                 similarity_threshold=0.35,
             )
+        
+        # 5d. Engram reactivation: retrieval reactivates the neural trace
+        for res in ranked_results:
+            if isinstance(res.memory, EpisodicMemory):
+                self.engram_engine.reactivate(res.memory.id)
                 
         # 6. Metamemory assessment
         confidence = self.metamemory.assess(query, ranked_results)
