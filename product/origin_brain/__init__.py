@@ -56,6 +56,7 @@ from .engram import EngramEngine, EngramConfig, Engram, EngramCell, EngramState
 from .cognitive_map import CognitiveMapEngine, CognitiveMapConfig
 from .neural_embedding import NeuralEmbeddingEngine, NeuralEmbeddingConfig, create_embedding_engine
 from .neocortex import NeocorticalEngine, NeocortexConfig, SemanticConcept, Schema
+from .shared_memory import SharedMemoryPool, SharedMemoryConfig, SharedMemoryEntry, MemoryScope, ConflictStrategy
 
 __all__ = [
     # Core API

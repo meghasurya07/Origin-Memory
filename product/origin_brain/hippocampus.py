@@ -22,7 +22,8 @@ class HippocampalEngine:
         self,
         config: BrainConfig,
         decay_engine: DecayEngine,
-        embedding_fn: Optional[Callable[[str], List[float]]] = None
+        embedding_fn: Optional[Callable[[str], List[float]]] = None,
+        semantic_engine: Optional[Any] = None,
     ):
         self.config = config
         self.decay_engine = decay_engine
@@ -35,8 +36,13 @@ class HippocampalEngine:
         # sorted list of (timestamp, memory_id)
         self._temporal_index: List[Tuple[datetime, str]] = []
         
-        # TF-IDF semantic search engine (upgrades Jaccard-like hash similarity)
-        self._semantic_engine = EmbeddingEngine()
+        # Semantic search engine — neural if provided, TF-IDF fallback
+        if semantic_engine is not None:
+            self._semantic_engine = semantic_engine
+            self._using_neural = True
+        else:
+            self._semantic_engine = EmbeddingEngine()
+            self._using_neural = False
 
     def _cosine_similarity(self, a: List[float], b: List[float]) -> float:
         """Computes standard cosine similarity between two vectors."""

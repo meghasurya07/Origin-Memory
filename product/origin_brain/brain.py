@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Literal, Optional, Union
+from typing import Any, Callable, Dict, List, Literal, Optional, Tuple, Union
 
 from pydantic import BaseModel, Field
 
@@ -72,10 +72,23 @@ class Brain:
             alpha=self.config.spaced_repetition_alpha,
             w=self.config.spaced_repetition_w
         )
+        # v0.7: Create neural embedding engine if configured
+        self._neural_engine = None
+        if self.config.use_neural_embeddings:
+            try:
+                from .neural_embedding import NeuralEmbeddingEngine, NeuralEmbeddingConfig
+                self._neural_engine = NeuralEmbeddingEngine(
+                    NeuralEmbeddingConfig(model_name=self.config.neural_model_name)
+                )
+                logger.info(f"Neural embeddings enabled: {self.config.neural_model_name}")
+            except ImportError:
+                logger.warning("Neural embeddings requested but transformers/torch not available. Using TF-IDF.")
+
         self.hippocampus = HippocampalEngine(
             config=self.config,
             decay_engine=self.decay_engine,
-            embedding_fn=self.embedding_fn
+            embedding_fn=self.embedding_fn,
+            semantic_engine=self._neural_engine,
         )
         self.consolidation = ConsolidationDaemon(
             hippocampus=self.hippocampus,
@@ -642,6 +655,23 @@ class Brain:
         # Combine, deduplicate, limit
         all_entities = list(dict.fromkeys(words + content_words))
         return all_entities[:20]
+
+    def query_semantic_network(self, concept: str, top_k: int = 10) -> List[Tuple[str, float]]:
+        """
+        Query the neocortical semantic network for associated concepts.
+        
+        Unlike recall() which retrieves specific episodes, this returns
+        statistical associations learned across many episodes during sleep.
+        
+        Example:
+            brain.query_semantic_network("Bob")
+            -> [("meeting", 0.8), ("budget", 0.7), ("office", 0.5)]
+        """
+        return self.neocortex.get_associations(concept, top_k=top_k)
+    
+    def get_learned_schema(self, schema_type: str):
+        """Get a learned schema by type name from the neocortex."""
+        return self.neocortex.get_schema(schema_type)
 
     def clear_context(self) -> None:
         """Clears the working memory context buffer."""

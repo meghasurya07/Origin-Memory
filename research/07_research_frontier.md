@@ -152,3 +152,84 @@ While write latency and synthesis costs currently restrict DNA storage to cold a
 2. **Consolidated Semantic Knowledge**: Multi-year semantic knowledge graphs accumulated through thousands of sleep consolidation cycles.
 3. **Agent Identity Blueprints**: The immutable "core soul" of the agent—fundamental values, behavioral boundaries, personality priors, and user relationship history.
 4. **Regulatory & Compliance Data**: Financial audit logs, medical interaction traces, and enterprise records legally mandated for 7–50 year retention without power consumption or bit rot.
+
+
+---
+
+## 9. Multi-Agent Shared Memory (2025-2026 State of Art)
+
+*Updated: 2026-10-12 from latest literature review*
+
+### The Problem
+~79% of multi-agent execution failures stem from coordination/structural desynchronization, not LLM reasoning failures. Current approaches:
+
+### Key Papers & Systems
+
+| System | Year | Key Insight |
+|:-------|:-----|:------------|
+| **MATM** (Kim et al., arXiv:2606.19911) | 2026 | Transactive Memory for AI — agents publish procedural trajectories, consumers retrieve when encountering similar subgoals |
+| **CoMem** (Yu et al., arXiv:2609.15009) | 2026 | Collective-Individual Memory Synergy: private sedimentation → collective curation → dual-stream retrieval |
+| **MIRIX** (arXiv:2507.07957) | 2025 | 6-tier memory (Core/Episodic/Semantic/Procedural/Resource/KnowledgeVault) + Auto-Dream consolidation agent |
+| **MemClaw/Caura** | 2025-26 | 4 failure modes: unauthorized leakage, stale propagation, contradiction persistence, provenance collapse |
+| **CoMAM** (arXiv:2603.12631) | 2026 | RL-optimized joint construction/retrieval agents with ranking consistency |
+| **ORALMEM** (NeurIPS 2026) | 2026 | Collective memory persistence across agent generations via gossip protocols |
+
+### Three-Tier Memory Architecture (Emerging Standard)
+1. **Global/Team Memory** — universal shared facts, team goals, environmental state
+2. **Role/Group Memory** — task-scoped partitions for collaborating sub-clusters
+3. **Private Memory** — agent-internal scratchpads, CoT traces, persona heuristics
+
+### Implications for Origin Brain
+- We need a `SharedMemoryPool` with scoped access controls
+- Transactive memory: each agent's Brain publishes to shared pool during consolidation
+- Conflict resolution: temporal supersession + provenance tracking
+- This is our path from single-agent library → multi-agent platform
+
+## 10. Memory-Augmented Reasoning (2025-2026)
+
+### Memory-as-a-Tool Paradigm
+Transitioning from passive RAG retrieval to active memory tool use:
+- Combats "Goldfish Effect" — prevents circular subgoal loops
+- Cognitive offloading — reduces context window pressure
+
+### Key Approaches
+- **TRM-VLA** (2025-26): Temporal-aware CoT conditioned on memory-augmented reasoning state
+- **GCoT** (Grounded CoT): Step-by-step reasoning grounded in spatial/temporal memory anchors
+- **Memory-Augmented Compression (MAC)**: Compress verbose CoT into modular reasoning patterns stored in episodic archive
+- **AgentHER**: Hindsight experience replay for LLM agents — relabel failures as successes for different goals
+
+### Experience Replay for Reasoning
+- RLEP: RL + continual replay of reasoning trajectories — 40% compute reduction
+- FreshPER: Temporal decay on stored surprise metrics to prevent stale replay
+- CER (Contextual Experience Replay): In-context replay without gradient updates
+
+## 11. Continual Learning — 2026 Verdict
+
+**Has anyone solved catastrophic forgetting? NO.**
+
+But the paradigm shifted from "prevention" to "durable knowledge management":
+
+| Method | State of Art (2026) |
+|:-------|:-------------------|
+| Parameter Isolation | **O-LoRA, InfLoRA, LEGO** — orthogonal parameter subspaces via MoE expert expansion |
+| Dark Replay | **Uncertainty-Aware DER++** — adaptive loss weighting + output correction |
+| Test-Time Memory | **Titans** (Google, arXiv:2501.00663) — neural long-term memory updated via surprise at test time, >2M token contexts |
+| Bio-Inspired | **Nested Learning + SleepGate** — dual-timescale weight updates + offline replay → WE DO THIS |
+
+### Origin Brain's Position
+Our CLS architecture (fast hippocampal + slow neocortical) aligns with the **Nested Learning + SleepGate** approach — we're already implementing the bio-inspired state of the art. Key advantage: we do this at the *application layer* (no weight updates needed), making it compatible with any frozen LLM backbone.
+
+## 12. Compositional Memory & The Binding Problem (2025-2026)
+
+### Hierarchical Abstraction Pipeline
+Episode → Concept → Schema → World Model (mirrors our architecture):
+1. **Episodic** (raw traces) → our `hippocampus.py`
+2. **Concept extraction** → our `neocortex.py` (co-occurrence learning)
+3. **Schema formation** → our `neocortex.py` (schema engine)
+4. **World models** → NEXT TARGET (predictive transition networks)
+
+### The Binding Problem in AI
+- Standard self-attention binds features by token proximity, not relational compositionality
+- **Vector Symbolic Architectures (VSA/HDC)**: High-dimensional vectors with algebraic binding operators
+- **Slot Attention**: Dynamic slots decompose streams into permutation-invariant entity representations
+- Potential future module for Origin Brain: `BindingEngine` using VSA for compositional memory traces
