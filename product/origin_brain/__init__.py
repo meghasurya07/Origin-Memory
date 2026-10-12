@@ -8,7 +8,7 @@ encode, consolidate, retrieve, and strategically forget information the way
 the human brain does.
 """
 
-__version__ = "0.7.0"
+__version__ = "0.8.0"
 
 # Core
 from .models import (
@@ -57,6 +57,7 @@ from .cognitive_map import CognitiveMapEngine, CognitiveMapConfig
 from .neural_embedding import NeuralEmbeddingEngine, NeuralEmbeddingConfig, create_embedding_engine
 from .neocortex import NeocorticalEngine, NeocortexConfig, SemanticConcept, Schema
 from .shared_memory import SharedMemoryPool, SharedMemoryConfig, SharedMemoryEntry, MemoryScope, ConflictStrategy
+from .world_model import WorldModelEngine, WorldModelConfig
 
 __all__ = [
     # Core API

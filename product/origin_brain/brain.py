@@ -140,6 +140,10 @@ class Brain:
         from .neocortex import NeocorticalEngine, NeocortexConfig
         self.neocortex = NeocorticalEngine(config=NeocortexConfig())
 
+        # v0.8: World model — predictive state transitions
+        from .world_model import WorldModelEngine, WorldModelConfig
+        self.world_model = WorldModelEngine(config=WorldModelConfig())
+
         # v0.5: Persistent storage
         if self.config.storage_path:
             from .storage import SQLiteStorage
@@ -152,7 +156,7 @@ class Brain:
         # Backward-compatible context buffer (delegates to working memory)
         self.context_buffer: Dict[str, Any] = {}
 
-        logger.info(f"Origin Brain v0.7 initialized for agent: {self.config.agent_id}")
+        logger.info(f"Origin Brain v0.8 initialized for agent: {self.config.agent_id}")
 
     @property
     def agent_id(self) -> str:
@@ -585,6 +589,7 @@ class Brain:
         
         # v0.7: CLS — Replay episodes to neocortex for slow learning
         # During sleep, hippocampal replay drives neocortical schema extraction
+        entity_sequences = []  # Collect for world model
         for memory in episodic_list:
             # Extract entities from memory content for neocortical learning
             content = memory.content if hasattr(memory, 'content') else str(memory)
@@ -595,9 +600,18 @@ class Brain:
                 "type": mem_type,
                 "content": content,
             })
+            if entities:
+                entity_sequences.append(entities)
         
-        # Decay neocortical associations slightly each sleep cycle
+        # v0.8: World model — learn state transitions from episode sequences
+        # Adjacent episodes form a sequence; entities within episodes form transitions
+        for seq in entity_sequences:
+            if len(seq) >= 2:
+                self.world_model.observe_sequence(seq[:10])  # Cap per-episode length
+        
+        # Decay neocortical associations and world model transitions
         self.neocortex.decay()
+        self.world_model.decay()
         
         logger.info(
             f"Sleep cycle complete: consolidated={report.total_consolidated}, "
@@ -672,6 +686,32 @@ class Brain:
     def get_learned_schema(self, schema_type: str):
         """Get a learned schema by type name from the neocortex."""
         return self.neocortex.get_schema(schema_type)
+
+    def predict_next(self, current_state: str, top_k: int = 5) -> List[Tuple[str, float]]:
+        """
+        Predict the most likely next states using the world model.
+        
+        The world model learns transition patterns from episodic replay
+        during sleep. This enables mental simulation / planning.
+        """
+        return self.world_model.predict_next(current_state, top_k=top_k)
+    
+    def simulate_future(self, start_state: str, steps: int = 5) -> List[str]:
+        """
+        Simulate a sequence of future states from the world model.
+        
+        Uses greedy strategy (always pick most likely next state).
+        """
+        return self.world_model.simulate(start_state, steps=steps)
+    
+    def compute_surprise(self, from_state: str, observed_next: str) -> float:
+        """
+        Compute how surprising a state transition is.
+        
+        High surprise = unexpected → should trigger enhanced encoding.
+        Returns 0 for expected transitions, 10 for completely novel ones.
+        """
+        return self.world_model.surprise(from_state, observed_next)
 
     def clear_context(self) -> None:
         """Clears the working memory context buffer."""
