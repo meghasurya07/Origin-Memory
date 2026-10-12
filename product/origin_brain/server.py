@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 app = FastAPI(
     title="Origin Brain API",
     description="Human-Like Memory Infrastructure for AI Agents — by Origin AI",
-    version="0.5.1",
+    version="0.7.0",
     docs_url="/docs",
     redoc_url="/redoc",
 )
@@ -129,7 +129,7 @@ class StatsResponse(BaseModel):
 
 class HealthResponse(BaseModel):
     status: str = "healthy"
-    version: str = "0.5.1"
+    version: str = "0.7.0"
     active_brains: int
     hcsi: float = 1.00
 
@@ -183,9 +183,16 @@ async def recall(request: RecallRequest):
                 tier=tier,
             ))
         
+        # Extract confidence value (may be MetamemoryAssessment or float)
+        confidence = recall_result.confidence
+        if hasattr(confidence, 'confidence'):
+            confidence = confidence.confidence
+        elif not isinstance(confidence, (int, float)):
+            confidence = 0.5
+        
         return RecallResponse(
             results=results,
-            confidence=recall_result.confidence,
+            confidence=float(confidence),
             query=request.query,
             total_results=len(results),
         )
@@ -314,6 +321,134 @@ async def health_legacy():
 @app.get("/stats/{agent_id}", include_in_schema=False)
 async def stats_legacy(agent_id: str):
     return await get_stats(agent_id)
+
+
+# ── v0.7: Multi-Agent Shared Memory Endpoints ──────────────────────
+
+from .shared_memory import SharedMemoryPool, MemoryScope
+
+_shared_pool = SharedMemoryPool()
+
+class SharedPublishRequest(BaseModel):
+    agent_id: str
+    key: str
+    value: str
+    scope: str = "global"  # "global" or "group"
+    group_id: Optional[str] = None
+    confidence: float = 1.0
+    category: str = "general"
+
+class SharedQueryRequest(BaseModel):
+    agent_id: str
+    key: Optional[str] = None
+    category: Optional[str] = None
+
+class GroupJoinRequest(BaseModel):
+    agent_id: str
+    group_id: str
+
+class SemanticQueryRequest(BaseModel):
+    agent_id: str
+    concept: str
+    top_k: int = 10
+
+
+@app.post("/v1/shared/publish")
+async def shared_publish(request: SharedPublishRequest):
+    """Publish a memory to the shared multi-agent pool."""
+    try:
+        scope = MemoryScope(request.scope)
+        entry = _shared_pool.publish(
+            agent_id=request.agent_id,
+            key=request.key,
+            value=request.value,
+            scope=scope,
+            group_id=request.group_id,
+            confidence=request.confidence,
+            category=request.category,
+        )
+        return {
+            "success": True,
+            "memory_id": entry.id,
+            "scope": entry.scope.value,
+            "key": entry.key,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/v1/shared/query")
+async def shared_query(request: SharedQueryRequest):
+    """Query the shared memory pool with scoped access."""
+    try:
+        results = _shared_pool.query(
+            agent_id=request.agent_id,
+            key=request.key,
+            category=request.category,
+        )
+        return {
+            "results": [
+                {
+                    "key": r.key,
+                    "value": r.value,
+                    "scope": r.scope.value,
+                    "author": r.author_agent_id,
+                    "confidence": r.confidence,
+                    "access_count": r.access_count,
+                }
+                for r in results
+            ],
+            "total": len(results),
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/v1/shared/join")
+async def shared_join_group(request: GroupJoinRequest):
+    """Add an agent to a shared memory group."""
+    _shared_pool.join_group(request.agent_id, request.group_id)
+    return {"success": True, "agent_id": request.agent_id, "group_id": request.group_id}
+
+
+@app.get("/v1/shared/stats")
+async def shared_stats():
+    """Get shared memory pool statistics."""
+    return _shared_pool.get_statistics()
+
+
+@app.post("/v1/semantic/query")
+async def semantic_query(request: SemanticQueryRequest):
+    """Query the neocortical semantic network for associated concepts."""
+    try:
+        brain = get_or_create_brain(request.agent_id)
+        associations = brain.query_semantic_network(request.concept, top_k=request.top_k)
+        return {
+            "concept": request.concept,
+            "associations": [{"concept": name, "strength": strength} for name, strength in associations],
+            "total": len(associations),
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/v1/schema/{agent_id}/{schema_type}")
+async def get_schema(agent_id: str, schema_type: str):
+    """Get a learned schema from the neocortex."""
+    if agent_id not in _brains:
+        raise HTTPException(status_code=404, detail=f"Brain for {agent_id} not found")
+    
+    brain = _brains[agent_id]
+    schema = brain.get_learned_schema(schema_type)
+    if not schema:
+        raise HTTPException(status_code=404, detail=f"Schema '{schema_type}' not found")
+    
+    return {
+        "name": schema.name,
+        "slots": schema.slots,
+        "instance_count": schema.instance_count,
+        "confidence": schema.confidence,
+    }
 
 
 # ── Entrypoint ──────────────────────────────────────────────────────
