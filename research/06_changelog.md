@@ -4,6 +4,25 @@
 
 ---
 
+## v0.7.0 (2026-10-12) — Neural Embeddings + CLS Complete
+
+**308 tests | HCSI 1.00 | 34 modules | ~10,500 lines**
+
+### New Modules
+| Module | Lines | Tests | What |
+|:-------|:------|:------|:-----|
+| `neural_embedding.py` | ~200 | 12 | Transformer embeddings (all-MiniLM-L6-v2, 384d). Drop-in TF-IDF replacement |
+| `neocortex.py` | ~310 | 13 | Slow statistical learning — co-occurrence, schema formation, spreading activation |
+
+### Changes
+- **Neural Embeddings**: Uses HuggingFace `transformers` + `torch` directly (avoids pyarrow crash on Python 3.14). Factory function `create_embedding_engine()` auto-detects best backend
+- **Neocortical Engine (CLS complete)**: McClelland et al. 1995 — fast hippocampal + slow neocortical learning. Schema formation from repeated episodes, schema-consistency scoring, concept co-occurrence tracking
+- **Brain Integration**: Neocortex wired into sleep pipeline — episodic replay drives neocortical learning. Entity extraction helper for semantic tokenization
+- **Research Consolidation**: 54 docs → 8 organized docs + archive. Critical content restored via enrichment pass (78KB vs 449KB originals, 17% = pure signal)
+- **BrainConfig**: `use_neural_embeddings`, `neural_model_name` options added
+
+---
+
 ## v0.6.0 (2026-09-15) — Engram + Cognitive Map + SDK
 
 **283 tests | HCSI 1.00 | 30 modules | ~9,500 lines**
