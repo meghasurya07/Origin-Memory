@@ -8,7 +8,7 @@ encode, consolidate, retrieve, and strategically forget information the way
 the human brain does.
 """
 
-__version__ = "0.6.0"
+__version__ = "0.7.0"
 
 # Core
 from .models import (
@@ -54,6 +54,8 @@ from .synaptic_plasticity import SynapticPlasticityEngine, PlasticityConfig, Syn
 from .client import OriginBrainClient, MemoryItem
 from .engram import EngramEngine, EngramConfig, Engram, EngramCell, EngramState
 from .cognitive_map import CognitiveMapEngine, CognitiveMapConfig
+from .neural_embedding import NeuralEmbeddingEngine, NeuralEmbeddingConfig, create_embedding_engine
+from .neocortex import NeocorticalEngine, NeocortexConfig, SemanticConcept, Schema
 
 __all__ = [
     # Core API

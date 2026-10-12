@@ -163,4 +163,7 @@ class BrainConfig(BaseModel):
     embedding_dimension: int = 1536
     # v0.5: Persistent storage path (None = in-memory only)
     storage_path: Optional[str] = None
+    # v0.6: Neural embeddings (requires sentence-transformers)
+    use_neural_embeddings: bool = False
+    neural_model_name: str = 'all-MiniLM-L6-v2'
 

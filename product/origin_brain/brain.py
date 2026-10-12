@@ -123,6 +123,10 @@ class Brain:
         from .cognitive_map import CognitiveMapEngine, CognitiveMapConfig
         self.cognitive_map = CognitiveMapEngine(config=CognitiveMapConfig())
 
+        # v0.7: Neocortical engine — slow statistical learning (CLS)
+        from .neocortex import NeocorticalEngine, NeocortexConfig
+        self.neocortex = NeocorticalEngine(config=NeocortexConfig())
+
         # v0.5: Persistent storage
         if self.config.storage_path:
             from .storage import SQLiteStorage
@@ -135,7 +139,7 @@ class Brain:
         # Backward-compatible context buffer (delegates to working memory)
         self.context_buffer: Dict[str, Any] = {}
 
-        logger.info(f"Origin Brain v0.5 initialized for agent: {self.config.agent_id}")
+        logger.info(f"Origin Brain v0.7 initialized for agent: {self.config.agent_id}")
 
     @property
     def agent_id(self) -> str:
@@ -566,9 +570,26 @@ class Brain:
             num_cycles=num_cycles
         )
         
+        # v0.7: CLS — Replay episodes to neocortex for slow learning
+        # During sleep, hippocampal replay drives neocortical schema extraction
+        for memory in episodic_list:
+            # Extract entities from memory content for neocortical learning
+            content = memory.content if hasattr(memory, 'content') else str(memory)
+            entities = self._extract_entities(content)
+            mem_type = memory.memory_type.value if hasattr(memory, 'memory_type') else "episodic"
+            self.neocortex.learn_from_episode({
+                "entities": entities,
+                "type": mem_type,
+                "content": content,
+            })
+        
+        # Decay neocortical associations slightly each sleep cycle
+        self.neocortex.decay()
+        
         logger.info(
             f"Sleep cycle complete: consolidated={report.total_consolidated}, "
-            f"evicted={report.total_evicted}, new_semantic={report.new_semantic_count}"
+            f"evicted={report.total_evicted}, new_semantic={report.new_semantic_count}, "
+            f"neocortex_concepts={len(self.neocortex._concepts)}"
         )
         return report
 
@@ -597,6 +618,30 @@ class Brain:
     def get_context_buffer(self) -> Dict[str, Any]:
         """Returns the current working memory context buffer."""
         return self.context_buffer
+
+    def _extract_entities(self, content: str) -> List[str]:
+        """
+        Extract entity-like tokens from memory content for neocortical learning.
+        
+        Simple heuristic: capitalized words, important nouns, named entities.
+        A production system would use NER, but this gives the neocortex
+        meaningful tokens to build co-occurrence associations from.
+        """
+        import re
+        words = re.findall(r'\b[A-Z][a-z]+\b', content)  # Capitalized words
+        # Also extract key content words (>4 chars, not stop words)
+        STOP = {'about', 'after', 'again', 'being', 'between', 'could',
+                'during', 'every', 'first', 'found', 'going', 'great',
+                'house', 'known', 'large', 'later', 'never', 'other',
+                'place', 'point', 'right', 'shall', 'since', 'small',
+                'state', 'still', 'their', 'there', 'these', 'thing',
+                'think', 'those', 'three', 'today', 'under', 'until',
+                'using', 'where', 'which', 'while', 'world', 'would'}
+        content_words = re.findall(r'\b[a-z]{5,}\b', content.lower())
+        content_words = [w for w in content_words if w not in STOP]
+        # Combine, deduplicate, limit
+        all_entities = list(dict.fromkeys(words + content_words))
+        return all_entities[:20]
 
     def clear_context(self) -> None:
         """Clears the working memory context buffer."""
