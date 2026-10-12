@@ -116,3 +116,35 @@ Our architecture is designed for this:
 | TypeScript SDK | 🟡 MEDIUM | 1 week | Web developer adoption |
 | Cloud hosting | 🟡 MEDIUM | 2 weeks | SaaS revenue |
 | Documentation site | 🟡 MEDIUM | 1 week | Developer experience |
+
+---
+
+## Competitor Deep Dive: Metacognition (SST)
+
+### Team & Background
+- **Founding Team**: Krish Jaiswal, Priyam Ghosh, Sauhard Gupta from the Scaler School of Technology (SST) in Bengaluru, India.
+- **Origins**: Started from a student research initiative ("Memora") exploring research paper consumption, evolving after domain expert feedback into an academic and commercial effort targeting AI memory loss.
+- **Core Product**: **"Tex"**, their proprietary memory system claiming state-of-the-art performance on memory benchmarks across AI agent evaluations.
+
+### Research Output & Core Papers
+The SST team is the only other known group approaching agent memory from a rigorous neuroscience-first, mathematical perspective:
+1. **"Differential Memory Decay: A Continuous-Time Model of Forgetting and Semantic Drift"**: Proposes continuous-time differential equations modeling how memories decay according to Ebbinghaus-style curves and undergo semantic drift into broader attractors.
+2. **"The Dynamics of Memory Replay, Diffusion and Attractor Formation"**: An energy-based formulation modeling how episodic memories evolve into semantic attractors through replay, stochastic diffusion, and attractor basins.
+
+### Academic Recognition & Conference Acceptances
+- **International Conference on the Mathematics of Neuroscience and AI**: Research framework accepted.
+- **IEEE ICACI** (International Conference on Advanced Computational Intelligence, China): Paper presentation.
+- **Rome Neuroscience Conference**: Presentation of memory dynamics framework.
+- **Advisory & Academic Ties**: Guidance from advisors connected to **UC Berkeley** and the **MIT Neuroscience Lab**.
+
+### Strategic Differentiation: Origin AI vs. Metacognition
+While Metacognition brings strong algorithmic rigor, Origin AI holds distinct structural advantages:
+
+| Dimension | Metacognition (Tex) | Origin AI (Origin Brain) |
+|:---|:---|:---|
+| **Architectural Scope** | Software-only memory attractor layer | **Full-Stack Brain Architecture** (PFC working memory, Hippocampal CA1/CA3/DG circuits, Neocortical schemas, Amygdala salience) |
+| **Physical Substrate** | Conventional silicon only | **Hybrid Silicon + DNA Storage Substrate** (BioCompute molecular tier for infinite-lifespan archival memory) |
+| **Cognitive Mechanisms** | Attractor decay & diffusion equations | **Reconstructive Generative Recall**, neuromodulation (ACh/DA/NE gating), and dream/sleep consolidation |
+| **Biological Fidelity** | Algorithmic approximation of decay | End-to-end biological functional equivalence across episodic, semantic, procedural, and genetic tiers |
+
+**Summary**: Metacognition is developing a software-only mathematical attractor model for memory decay. Origin AI builds a full-stack cognitive brain—coupling biological memory dynamics (reconstruction, neuromodulatory gating, and sleep cycles) with a breakthrough DNA storage hardware substrate.

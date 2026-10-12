@@ -113,3 +113,92 @@ Hippocampus place cells encode the SUCCESSOR REPRESENTATION, making memory a pre
 E_{total} = E_{encoding} + E_{decay} + E_{interference} + E_{consolidation}
 E_{encoding} = -\sum_{i} \text{salience}_i \cdot \text{surprise}_i \cdot \text{emotional\_boost}_i
 E_{interference} = \sum_{i \neq j} \text{sim}(M_i, M_j) \cdot S_i \cdot S_j \cdot \mathbb{1}[\text{contradiction}(i,j)]
+
+## 8. Free Energy Principle
+
+The Free Energy Principle (Friston 2005, 2010) establishes that self-organizing biological systems minimize variational free energy $F$ to maintain their structural and cognitive integrity. Memory is the updating of the internal generative model:
+
+$$F = D_{KL}[q(s|o) \parallel p(s)] - \ln p(o|s) = \underbrace{\text{Complexity}}_{\text{cost of updating model}} - \underbrace{\text{Accuracy}}_{\text{how well model predicts}}$$
+
+Where:
+- $o$ represents sensory observations / incoming agent inputs.
+- $s$ represents hidden environmental states.
+- $q(s|o)$ is the recognition density (the agent's inferred belief state).
+- $p(s)$ is the prior generative density over environmental states.
+- $p(o|s)$ is the likelihood mapping from states to expected observations.
+
+### Implications for Cognitive Memory
+1. **Memory as Generative Parameters**: Rather than storing raw sensory inputs, memory stores the parameters of a predictive generative model.
+2. **Selective Updating**: When $F$ is minimal, observation $o$ is already explained by existing schemas (zero learning required). Memory updates are triggered strictly to suppress prediction divergence.
+
+---
+
+## 9. Precision-Weighted Encoding Gate
+
+Grounded in predictive processing, encoding is gated by precision-weighted prediction errors rather than logging raw streams.
+
+### Mathematical Formulation
+Given sensory input $x_t$, context prediction $\hat{x}_t$, and context precision (inverse variance / confidence) $\pi_t = 1/\sigma_t^2$:
+
+$$\text{encode}(x_t) = \begin{cases} 
+\text{STRONG encode} & \text{if } \pi_t \cdot \|x_t - \hat{x}_t\|^2 > \theta_{\text{encode}} \\ 
+\text{WEAK encode} & \text{if } \|x_t - \hat{x}_t\|^2 > \theta_{\text{weak}} \\ 
+\text{SKIP} & \text{otherwise} 
+\end{cases}$$
+
+Where:
+- $\hat{x}_t$: The internal model's expectation of input $x_t$.
+- $\pi_t$: Precision metric denoting contextual reliability; prevents random environmental noise or stochastic chatter from triggering memory allocation.
+- $\theta_{\text{encode}}$: High threshold requiring both high prediction error and high contextual reliability, allocating new episodic engrams with elevated stability.
+- $\theta_{\text{weak}}$: Intermediate threshold capturing moderate novelty without full precision reinforcement.
+- $\text{SKIP}$: Predictable or noisy inputs below threshold are discarded, preventing memory bloat and preserving cognitive bandwidth.
+
+---
+
+## 10. Hopfield ≡ Attention Identity
+
+A foundational insight uniting modern deep learning and associative memory (Ramsauer et al. 2020) is that Transformer self-attention is mathematically identical to the continuous state update in a Modern Hopfield Network.
+
+### The Formal Identity
+$$\text{Memory Retrieval} \equiv \text{Attention} \equiv \text{Hopfield Update}$$
+
+$$\boldsymbol{\xi}^{t+1} = \mathbf{X} \cdot \text{softmax}\left(\beta \mathbf{X}^T \boldsymbol{\xi}^t\right) \equiv \text{softmax}\left(\frac{\mathbf{Q}\mathbf{K}^T}{\sqrt{d_k}}\right)\mathbf{V}$$
+
+### The Softmax Equation Mapping
+In a Modern Hopfield Network with continuous state $\boldsymbol{\xi}$, stored memory patterns $\mathbf{X} = (\mathbf{x}_1, \dots, \mathbf{x}_N)$, inverse temperature $\beta$, and energy function $E = -\beta^{-1}\ln\left(\sum_{i=1}^N \exp(\beta \boldsymbol{\xi}^T \mathbf{x}_i)\right) + \frac{1}{2}\boldsymbol{\xi}^T\boldsymbol{\xi}$:
+
+| Hopfield Attractor Variable | Transformer Attention Analog | Cognitive Memory Analog |
+|:---|:---|:---|
+| State vector $\boldsymbol{\xi}^t$ | Query vector $\mathbf{Q}$ | Retrieval cue (partial episodic prompt) |
+| Memory patterns $\mathbf{X}^T$ | Key matrix $\mathbf{K}^T$ | Stored memory representations |
+| Normalization factor $\beta$ | Inverse scale factor $1/\sqrt{d_k}$ | Attractor sharpness / retrieval temperature |
+| State update $\boldsymbol{\xi}^{t+1}$ | Attention output $\mathbf{A}$ | Reconstructed / retrieved memory pattern |
+| Memory values $\mathbf{X}$ | Value matrix $\mathbf{V}$ | Content-addressable memory engrams |
+
+This equivalence demonstrates that multi-head attention is a bank of parallel continuous-attractor associative memory networks operating over episodic representations.
+
+---
+
+## 11. Unified Energy Function
+
+The global operation of the Origin Brain memory system minimizes a unified energy function $E_{\text{total}}$, balancing predictive error, temporal binding, storage complexity, and semantic consolidation:
+
+$$E_{\text{total}} = E_{\text{prediction}} + E_{\text{context}} + E_{\text{complexity}} + E_{\text{consolidation}}$$
+
+### Component Energy Terms
+
+1. **Prediction Energy ($E_{\text{prediction}}$)**:
+   $$E_{\text{prediction}} = \sum_t \pi_t \|x_t - \hat{x}_t\|^2$$
+   Measures cumulative precision-weighted prediction error. Minimizing $E_{\text{prediction}}$ drives selective encoding of surprising observations.
+
+2. **Context Binding Energy ($E_{\text{context}}$)**:
+   $$E_{\text{context}} = -\sum_{i,j} \text{sim}(\mathbf{c}_i, \mathbf{c}_j) \cdot \text{Association}(m_i, m_j)$$
+   Encodes temporal and associative contiguity (TCM). Minimizing $E_{\text{context}}$ pulls temporally contiguous memories into coherent, sequential episodic trajectories.
+
+3. **Complexity / Retention Energy ($E_{\text{complexity}}$)**:
+   $$E_{\text{complexity}} = \sum_i S_i \cdot (1 - R_i(t))$$
+   Represents the thermodynamic and computational cost of maintaining low-retrievability traces. Minimizing $E_{\text{complexity}}$ drives active forgetting and engram decay of unused information.
+
+4. **Consolidation Pressure Energy ($E_{\text{consolidation}}$)**:
+   $$E_{\text{consolidation}} = -\sum_i \text{schema\_match}(m_i) \cdot f(\text{access\_count}_i)$$
+   Reflects the structural alignment of memories into generalized cognitive schemas. Minimizing $E_{\text{consolidation}}$ compresses recurring episodic traces into durable semantic knowledge graphs during sleep/consolidation phases.

@@ -174,3 +174,91 @@ sleep_report = brain.sleep(duration_cycles=3)
   Strict schema validation ensures the structured memory entities (Episodic, Semantic facts) remain consistent when integrating with diverse LLM outputs and database stores.
 - **Weight Choices & Thresholds:**
   Parameters like Spaced Repetition efficiency ($\alpha = 0.3$), decay modifier ($w = -0.01$), and survival threshold ($0.05$) were tuned via 11 computational experiments to achieve a Human Cognitive Similarity Index (HCSI) of 0.80, perfectly modeling Ebbinghaus forgetting curves and retrieval-induced inhibition.
+
+## 8. Performance Targets
+
+The system design specifies concrete service-level agreements (SLAs) and performance bounds designed to maintain real-time agent execution while mirroring biological latency profiles:
+
+| Operation / Metric | Target SLA | Biological Equivalent | Notes |
+|:---|:---|:---|:---|
+| **Encoding Latency** | **< 50 ms** | Hippocampal rapid encoding | Real-time surprise evaluation and vector insertion |
+| **Episodic Retrieval** | **< 10 ms (p99)** | Hippocampal pattern completion (CA3) | Content-addressable fast recall from vector index |
+| **Semantic Retrieval** | **< 100 ms (p99)** | Neocortical associative recall | Multi-hop knowledge graph queries and schema binding |
+| **Consolidation Cycle** | **< 5 min / 1,000 episodes** | Slow-Wave Sleep (SWS) replay | Offline batch pattern extraction and decay update |
+| **DNA Archival Write** | **< 1 hour / batch** | Molecular consolidation | Batch serialization and synthesis dispatch |
+| **DNA Archival Read** | **< 30 min / retrieval** | Deep phylogenetic / long-term recall | Targeted PCR amplification and sequencing |
+| **Total Memory Capacity** | **100M+ episodes / agent** | Lifetime cognitive capacity | Horizontal scaling over tiered NVMe and pgvector |
+| **Forgetting Alignment** | **> 90% agreement** | Ecological memory retention | Alignment with human-rated Ebbinghaus retention |
+
+---
+
+## 9. Consolidation Daemon Parameters
+
+The `ConsolidationDaemon` runs background offline cycles during agent idle states (sleep phase), converting fluid episodic traces into stable neocortical semantic facts. 
+
+### Operational Selection Criteria
+Memories eligible for consolidation must satisfy four gating thresholds:
+
+```python
+consolidation_criteria = {
+    "min_age": timedelta(hours=24),  # Age > 24h: Prevents consolidating labile, unfinalized episodes
+    "min_access_count": 2,           # Access >= 2: Filters out one-off noise; requires rehearsal
+    "min_salience": 0.3,             # Salience >= 0.3: Confirms affective/behavioral significance
+    "chunk_size": 50                 # Chunk size 50: Batches episodes for cross-trace pattern extraction
+}
+```
+
+### Execution Lifecycle
+1. **Replay Phase**: Gathers episodes meeting `age > 24h`, `access_count >= 2`, and `salience >= 0.3`.
+2. **Chunked Extraction**: Divides eligible engrams into batches of **50 episodes** and submits them to the pattern induction engine to derive semantic triplets.
+3. **Knowledge Graph Integration**: Inserts new facts or triggers Elastic Weight Consolidation (EWC) updates on existing nodes.
+4. **Synaptic Downscaling**: Evicts low-salience episodic traces whose retrievability has fallen below the survival threshold ($R < 0.05$).
+
+---
+
+## 10. Schema Definitions
+
+To facilitate accelerated, one-shot learning (mirroring human vmPFC function), the architecture pre-registers five structured cognitive schemas. Information congruent with these schemas bypasses multi-cycle consolidation and directly populates semantic structures:
+
+### 1. `user_preference`
+- **Purpose**: Tracks explicit and implicit user habits, settings, and behavioral predispositions.
+- **Slots**:
+  - `preference_type` (*string*, required): Domain of preference (e.g., "ui_theme", "communication_style").
+  - `value` (*string*, required): Preferred choice (e.g., "dark_mode", "concise").
+  - `strength` (*number*, optional): Weight of preference in $[0, 1]$.
+
+### 2. `meeting`
+- **Purpose**: Encapsulates scheduled interactions, appointments, and syncs.
+- **Slots**:
+  - `title` (*string*, required): Summary or event name.
+  - `datetime` (*datetime*, required): Scheduled timestamp and timezone.
+  - `participants` (*string / list*, optional): Attendees involved.
+  - `location` (*string*, optional): Physical venue or virtual call link.
+  - `notes` (*string*, optional): Agenda items or meeting minutes.
+
+### 3. `person`
+- **Purpose**: Represents entities in the user's social, professional, or organizational sphere.
+- **Slots**:
+  - `name` (*string*, required): Full name or handle.
+  - `role` (*string*, optional): Title or functional responsibility.
+  - `relationship` (*string*, optional): Connection to user (e.g., "manager", "client", "colleague").
+  - `contact` (*string*, optional): Communication endpoints (email, phone, Slack).
+  - `notes` (*string*, optional): Background context and historical rapport.
+
+### 4. `task`
+- **Purpose**: Manages commitments, action items, and goals.
+- **Slots**:
+  - `title` (*string*, required): Actionable summary of task.
+  - `status` (*string*, required): Current state (e.g., "pending", "in_progress", "completed", "blocked").
+  - `priority` (*string*, optional): Urgency rating ("low", "medium", "high", "critical").
+  - `deadline` (*datetime*, optional): Target completion date.
+  - `assignee` (*string*, optional): Responsible entity or delegate.
+
+### 5. `fact`
+- **Purpose**: General semantic assertions and declarative ground truths.
+- **Slots**:
+  - `subject` (*string*, required): Entity of reference.
+  - `predicate` (*string*, required): Relation or property attribute.
+  - `object` (*string*, required): Target entity or assertion value.
+  - `source` (*string*, optional): Provenance, URL, or citation origin.
+  - `confidence` (*number*, optional): Subjective certainty / calibration score in $[0, 1]$.
