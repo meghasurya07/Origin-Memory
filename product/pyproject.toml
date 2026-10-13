@@ -4,14 +4,14 @@ build-backend = "hatchling.build"
 
 [project]
 name = "origin-brain"
-version = "0.7.0"
+version = "0.8.0"
 description = "Human-Like Brain/Memory Infrastructure for AI Agents — by Origin AI"
 readme = "README.md"
 requires-python = ">=3.11"
 authors = [
     { name = "Origin AI", email = "info@originai.in" }
 ]
-license = { text = "Proprietary" }
+license = { text = "Apache-2.0" }
 keywords = [
     "ai", "memory", "brain", "cognitive", "neuroscience",
     "agent", "llm", "forgetting", "consolidation", "hippocampus"
@@ -40,13 +40,15 @@ test = [
 ]
 server = [
     "fastapi>=0.100.0",
-    "uvicorn[standard]>=0.20.0"
+    "uvicorn[standard]>=0.20.0",
+    "httpx"
 ]
-embeddings = [
-    "sentence-transformers>=2.0"
+neural = [
+    "transformers>=4.30.0",
+    "torch>=2.0.0"
 ]
 all = [
-    "origin-brain[test,server,embeddings]"
+    "origin-brain[test,server,neural]"
 ]
 
 [tool.pytest.ini_options]
