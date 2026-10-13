@@ -35,3 +35,16 @@ desktop.ini
 # Distribution
 *.tar.gz
 *.whl
+
+# Node.js / Next.js (app/)
+node_modules/
+.next/
+out/
+.env
+.env.local
+.env.production.local
+*.tsbuildinfo
+next-env.d.ts
+
+# Brain data (generated at runtime)
+brain_data/
