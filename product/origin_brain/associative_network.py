@@ -149,7 +149,7 @@ RELATION_PATTERNS = [
     # likes / prefers / enjoys
     (r"(\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s+(?:likes?|prefers?|enjoys?|loves?)\s+(.+?)(?:\.|,|$)",
      "prefers"),
-    # married to / related to
+    # married to / related to / family
     (r"(\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s+(?:(?:is\s+)?married\s+to|(?:is\s+)?(?:the\s+)?(?:sister|brother|mother|father|wife|husband|partner)\s+of)\s+(.+?)(?:\.|,|$)",
      "related_to"),
     # created / built / made
@@ -158,8 +158,23 @@ RELATION_PATTERNS = [
     # studies / learning
     (r"(\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s+(?:studies|(?:is\s+)?(?:learning|studying))\s+(.+?)(?:\.|,|$)",
      "studies"),
+    # thinks / believes / said / mentioned (cognitive verbs -> claim relations)
+    (r"(\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s+(?:thinks?|believes?|said|mentioned|claimed|suggested|argued|stated)\s+(.+?)(?:\.|$)",
+     "claims"),
+    # adopted / got / bought / named
+    (r"(\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s+(?:adopted|got|bought|named|received|acquired)\s+(.+?)(?:\.|,|$)",
+     "has"),
+    # accepted / rejected / declined / took
+    (r"(\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s+(?:accepted|rejected|declined|took|received|got)\s+(.+?)(?:\.|,|$)",
+     "acted_on"),
+    # "X and Y" conjunctive pattern — creates association between co-mentioned entities
+    (r"(\b[A-Z][a-z]+)\s+and\s+(\b[A-Z][a-z]+)\b",
+     "associated_with"),
+    # is someone's (mentor/friend/colleague)
+    (r"(\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s+is\s+(\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)'s\s+(\w+)",
+     "_possessive_"),
     # general verb pattern (fallback)
-    (r"(\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s+((?:will\s+)?(?:start|join|move|leave|visit|attend|buy|sell)(?:s|ed|ing)?)\s+(.+?)(?:\.|,|$)",
+    (r"(\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s+((?:will\s+)?(?:start|join|move|leave|visit|attend|buy|sell|interview|hear)(?:s|ed|ing)?)\s+(.+?)(?:\.|,|$)",
      "_verb_"),
 ]
 
@@ -188,6 +203,13 @@ def extract_entities_and_relations(text: str) -> List[Tuple[str, str, str]]:
                     verb = groups[1].strip().lower()
                     obj = groups[2].strip()
                     triples.append((subject, verb, obj))
+            elif relation == "_possessive_":
+                # Possessive: "X is Y's mentor" -> (X, mentor_of, Y)
+                if len(groups) >= 3:
+                    subject = groups[0].strip()
+                    owner = groups[1].strip()
+                    role = groups[2].strip().lower()
+                    triples.append((subject, f"{role}_of", owner))
             else:
                 subject = groups[0].strip()
                 obj = groups[1].strip() if len(groups) > 1 else ""

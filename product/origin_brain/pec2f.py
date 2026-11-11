@@ -250,8 +250,8 @@ class PEC2FEngine:
                         relation="ABOUT",
                     ))
 
-        # 6. If it's a fact, check for contradicting claims/facts
-        if node_type == PEC2FNodeType.FACT:
+        # 6. If it's a fact or event, check for contradicting claims/facts/events
+        if node_type in (PEC2FNodeType.FACT, PEC2FNodeType.EVENT):
             self._check_and_link_contradictions(knowledge_node)
 
         # 7. If it's an event, link to involved people
@@ -353,50 +353,66 @@ class PEC2FEngine:
         """Check if a new fact contradicts existing claims or facts."""
         new_words = set(new_node.content.lower().split())
 
+        # Extract person names mentioned in the new node
+        new_names = {n.lower() for n in self._extract_person_names(new_node.content)}
+
         for existing in self._nodes.values():
             if existing.id == new_node.id:
                 continue
-            if existing.node_type not in (PEC2FNodeType.FACT, PEC2FNodeType.CLAIM):
+            if existing.node_type not in (PEC2FNodeType.FACT, PEC2FNodeType.CLAIM, PEC2FNodeType.EVENT):
                 continue
 
             existing_words = set(existing.content.lower().split())
+
+            # Check for shared person names (same subject = related content)
+            existing_names = {n.lower() for n in self._extract_person_names(existing.content)}
+            shared_names = new_names & existing_names
+
+            # Check word overlap
             overlap = len(new_words & existing_words) / max(len(new_words | existing_words), 1)
 
-            if overlap > 0.3:
-                # High overlap means related — check for contradiction signals
-                negation_pairs = [
-                    ("accepted", "rejected"), ("likes", "hates"), ("yes", "no"),
-                    ("true", "false"), ("started", "stopped"), ("joined", "left"),
-                    ("supports", "opposes"), ("agrees", "disagrees"),
-                ]
-                is_contradiction = any(
-                    (a in new_words and b in existing_words) or
-                    (b in new_words and a in existing_words)
-                    for a, b in negation_pairs
-                )
+            # Two strategies for contradiction detection:
+            # 1. High word overlap with negation pairs
+            # 2. Shared subject (person name) with negation pairs (even low overlap)
+            negation_pairs = [
+                ("accepted", "rejected"), ("likes", "hates"), ("yes", "no"),
+                ("true", "false"), ("started", "stopped"), ("joined", "left"),
+                ("supports", "opposes"), ("agrees", "disagrees"),
+                ("hired", "fired"), ("promoted", "demoted"),
+                ("approved", "denied"), ("passed", "failed"),
+            ]
 
-                if is_contradiction:
-                    # Link as contradiction
-                    self._edges.append(KnowledgeEdge(
-                        source_id=new_node.id,
-                        target_id=existing.id,
-                        relation="CONTRADICTS",
-                    ))
-                    if existing.node_type == PEC2FNodeType.CLAIM:
-                        existing.claim_status = "contradicted"
-                    if existing.node_type == PEC2FNodeType.FACT:
-                        existing.contradicting_claims += 1
-                    new_node.contradicting_claims += 1
-                else:
-                    # Link as supporting
-                    self._edges.append(KnowledgeEdge(
-                        source_id=new_node.id,
-                        target_id=existing.id,
-                        relation="SUPPORTS",
-                    ))
-                    if existing.node_type == PEC2FNodeType.FACT:
-                        existing.supporting_claims += 1
-                    new_node.supporting_claims += 1
+            is_contradiction = any(
+                (a in new_words and b in existing_words) or
+                (b in new_words and a in existing_words)
+                for a, b in negation_pairs
+            )
+
+            # Require either word overlap OR shared subject for contradiction
+            is_related = overlap > 0.3 or (shared_names and overlap > 0.1)
+
+            if is_contradiction and is_related:
+                # Link as contradiction
+                self._edges.append(KnowledgeEdge(
+                    source_id=new_node.id,
+                    target_id=existing.id,
+                    relation="CONTRADICTS",
+                ))
+                if existing.node_type == PEC2FNodeType.CLAIM:
+                    existing.claim_status = "contradicted"
+                if existing.node_type == PEC2FNodeType.FACT:
+                    existing.contradicting_claims += 1
+                new_node.contradicting_claims += 1
+            elif is_related and not is_contradiction:
+                # Link as supporting
+                self._edges.append(KnowledgeEdge(
+                    source_id=new_node.id,
+                    target_id=existing.id,
+                    relation="SUPPORTS",
+                ))
+                if existing.node_type == PEC2FNodeType.FACT:
+                    existing.supporting_claims += 1
+                new_node.supporting_claims += 1
 
     # ── Query & Retrieval ───────────────────────────────────────────────
 
