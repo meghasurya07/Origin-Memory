@@ -8,7 +8,7 @@ encode, consolidate, retrieve, and strategically forget information the way
 the human brain does.
 """
 
-__version__ = "0.8.0"
+__version__ = "0.10.0"
 
 # Core
 from .models import (
@@ -59,6 +59,11 @@ from .neocortex import NeocorticalEngine, NeocortexConfig, SemanticConcept, Sche
 from .shared_memory import SharedMemoryPool, SharedMemoryConfig, SharedMemoryEntry, MemoryScope, ConflictStrategy
 from .world_model import WorldModelEngine, WorldModelConfig
 
+# v0.9-v0.10 engines
+from .temporal_invalidation import TemporalInvalidationEngine
+from .associative_network import AssociativeNetwork, AssociativeNetworkConfig
+from .pec2f import PEC2FEngine, PEC2FNodeType
+
 __all__ = [
     # Core API
     "Brain",
@@ -97,5 +102,11 @@ __all__ = [
     "SleepEngine",
     "SleepConfig",
     "SleepReport",
+    # v0.9-v0.10 engines
+    "TemporalInvalidationEngine",
+    "AssociativeNetwork",
+    "AssociativeNetworkConfig",
+    "PEC2FEngine",
+    "PEC2FNodeType",
 ]
 

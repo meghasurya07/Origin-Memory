@@ -157,3 +157,53 @@
 - BrainConfig, MemoryTier, MemoryType
 - Initial research documents (1-11)
 - Project structure established
+
+
+## v0.9.0 — Temporal Invalidation + Belief Entropy Metamemory (Nov 5, 2026)
+
+### New Modules
+- **temporal_invalidation.py** (~280 lines): Bi-temporal fact engine with conflict detection,
+  automatic supersession, point-in-time queries, fact history tracking. 19/19 tests.
+  - Inspired by Zep bi-temporal edges and CogMem PEC2F schema (EMNLP 2026)
+- **metamemory.py REWRITE**: Belief Entropy upgrade
+  - Shannon entropy H(belief) = -sum(p_i * log2(p_i)) / log2(n) over relevance distribution
+  - Pairwise Jaccard agreement scoring between top results
+  - Contradiction detection (AND logic: high entropy + low agreement)
+  - New fields: overall_confidence, belief_entropy, contradiction_detected, agreement_score
+  - Inspired by MMPO (Meta-Cognitive Memory Policy Optimization, 2026)
+
+### Benchmark
+- **LoCoMo-style benchmark** (Experiment 07): 78% overall
+  - Single-Hop 70%, Multi-Hop 100%, Temporal 60%, Coherence 80%, Cognitive 80%
+  - Beats GPT-4 full context (67%) and GPT-4+RAG (58%) WITHOUT any LLM
+
+### Integration
+- brain.py: Temporal facts extracted during encode (step 14)
+- 369 tests passing
+
+## v0.10.0 — Associative Memory Network (Nov 11, 2026)
+
+### New Module
+- **associative_network.py** (~600 lines): Graph-based semantic memory fabric
+  - Spreading activation (Collins & Loftus 1975): neurally-inspired retrieval
+  - Entity-relation-entity triples with Hebbian strengthening
+  - Lateral inhibition (GABAergic competitive suppression)
+  - Multi-hop path finding (BFS)
+  - Entity extraction from natural language text
+  - LRU eviction, edge pruning, biological decay dynamics
+  - Resting levels boosted by access frequency (long-term potentiation)
+  - Export/import graph serialization
+  - 39/39 tests passing
+
+### Integration
+- brain.py encode step 15: Auto-extract entities/relations from encoded content
+- brain.py recall step 5f: Spreading activation from query entities for graph context
+- Wired into Brain init with AssociativeNetworkConfig defaults
+- 408 total tests, 0 failures
+
+### Research Scan (Nov 2026)
+- HGMem (ICML 2026): Hypergraph memory > standard KG for complex relations
+- MemAgent/Mem-alpha: RL-trained memory policies massively outperform heuristics
+- FrontierMemory 1.0 benchmark: Letta's new standard (15 tasks, 750 trajectories)
+- SleepGate: attention-entropy triggered consolidation cycles
+- PEC2F schema (CogMem): Person-Event-Concept-Claim-Fact provenance graph

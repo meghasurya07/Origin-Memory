@@ -304,3 +304,65 @@ No amount of improvement to any single factor (e.g., better embeddings) can matc
 | P2 | Vector DB Backend | Replace in-memory with pgvector/Milvus | 2 days |
 | P3 | DNA Storage Prototype | Proof-of-concept archival pipeline | 5 days |
 | P3 | Consciousness Self-Model | Brain that models its own memory processes | 3 days |
+
+
+## November 2026 Update — Critical New Research
+
+### RL-Based Memory Policies (HIGHEST PRIORITY)
+- **MemAgent**: RL-trained read/overwrite strategy. 7B/14B models extrapolate from 8K-32K
+  training to 3.5M+ tokens with <5-10% perf drop. Uses DAPO (Direct Alignment Policy Optimization).
+- **Mem-alpha**: RL-trained structured memory with core/episodic/semantic components +
+  write/update/delete tools. Trained on 30K tokens, generalizes to 400K+ (13x extrapolation).
+  Reward = downstream QA accuracy.
+- **PMR (Personalized Memory Rubrics)**: Rubric-guided credit assignment for training what to store per user.
+- **ACTION**: We must implement RL-based memory management to replace our heuristic approach.
+
+### HGMem — Hypergraph Memory (ICML 2026, CUHK/Tencent)
+- Replaces pairwise knowledge graphs with hypergraphs (n-ary relations)
+- Memory evolves dynamically as agent reasons
+- Superior on NarrativeQA and multi-hop vs flat RAG and GraphRAG
+- **ACTION**: Extend our AssociativeNetwork to support hyperedges (n-ary relations)
+
+### FrontierMemory 1.0 Benchmark (Letta, Oct 2026)
+- 750 past agent trajectories as input
+- Phase 1: 6-hour "dreaming" window to synthesize memory folder
+- Phase 2: 15 target evaluation tasks (binary pass/fail)
+- Top scores: Opus 5.5 (73.3%), GLM-5.3 (73.3%), Kimi K3 (66.7%)
+- **ACTION**: Build trajectory ingestion + dreaming pipeline for this benchmark
+
+### PEC2F Schema (CogMem, EMNLP 2026) — Full Details
+- 5 node types: Person, Event, Concept, Claim, Fact
+- Claims have source-attribution provenance: (Person_source, CLAIMS, ClaimNode) AND (ClaimNode, ABOUT, Target)
+- Active Plasticity Retrieval: O_anchor (hybrid search), O_traverse (temporal navigation), O_intersect (neighborhood overlap)
+- Critique-then-reconstruct pipeline: Draft -> Critique (temporal contradictions, misattributed claims) -> Reconstruct
+- **ACTION**: Implement PEC2F node types in our AssociativeNetwork
+
+### SleepGate Architecture
+- Conflict-Aware Temporal Tagger + Lightweight Forgetting Gate + Consolidation Module
+- Triggered by attention entropy thresholds during inference
+- Dual-phase training: wake-phase LM loss + sleep-phase post-consolidation retrieval loss
+- **ACTION**: Add attention-entropy triggers to our sleep.py consolidation
+
+### Competitor Status (Nov 2026)
+| Competitor | Version | Key Feature | Threat |
+|-----------|---------|-------------|--------|
+| Mem0 | SDK v2.2.0+ | User Profiles, memory expiration, Vercel/OpenAI integration | HIGH |
+| Zep/Graphiti | v0.31.x | Agent Skills (procedural memory), bi-temporal, FalkorDB | HIGH |
+| Letta | FrontierMemory 1.0 | Dreaming framework, AgentFile, benchmark standard | HIGH |
+| supermemory | API v5 | Dual-mode (memory vs superrag), semantic forgetting | MEDIUM |
+| LangMem | LangGraph native | Background Memory Manager, ecosystem lock-in | MEDIUM |
+| Cognee | v1.0 | remember/recall/improve/forget primitives, code graph | MEDIUM |
+
+### Key Surveys
+- "Memory for Large Language Models" (arXiv:2607.25380): 3-axis taxonomy (Representation, Update Dynamics, Persistence)
+- "Human-Like Lifelong Memory": Neuroscience-grounded architecture matching our approach
+
+### Multimodal Memory
+- EmbeddingGemma 2: Unified 768-dim vector space for text/code/image/video/audio
+- ADAMM: Analytic memory with provenance-linked attribute-value observations
+- LMMR: Shared Sparse Autoencoder concept space for textual+visual features
+
+### Consciousness Frameworks
+- CTM-AI: Conscious Turing Machine with decentralized info competition
+- MEM Architecture: Motivated Emotional Mind with semblion-based associative memory
+- "A Mind Cannot Be Smeared Across Time": Chord vs Arpeggio hypothesis for temporal binding

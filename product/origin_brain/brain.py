@@ -148,6 +148,14 @@ class Brain:
         from .temporal_invalidation import TemporalInvalidationEngine
         self.temporal_facts = TemporalInvalidationEngine()
 
+        # v0.10: Associative network — graph-based semantic fabric
+        from .associative_network import AssociativeNetwork, AssociativeNetworkConfig
+        self.associative_net = AssociativeNetwork(config=AssociativeNetworkConfig())
+
+        # v0.10: PEC2F knowledge schema — provenance-aware claim/fact separation
+        from .pec2f import PEC2FEngine
+        self.knowledge_graph = PEC2FEngine()
+
         # v0.5: Persistent storage
         if self.config.storage_path:
             from .storage import SQLiteStorage
@@ -333,6 +341,28 @@ class Brain:
                 memory.metadata['superseded_fact'] = invalidated_id
                 logger.info(f"Fact supersession: {fact.subject}.{fact.predicate} = {fact.object} (replaced {invalidated_id})")
 
+        # 15. v0.10: Build associative graph — extract entities/relations
+        try:
+            assoc_edges = self.associative_net.ingest_text(content)
+            if assoc_edges:
+                memory.metadata['graph_edges'] = len(assoc_edges)
+                logger.debug(f"Associative graph: extracted {len(assoc_edges)} edges from memory {memory.id}")
+        except Exception as e:
+            logger.warning(f"Associative graph extraction failed: {e}")
+
+        # 16. v0.10: PEC2F knowledge extraction — classify as person/event/concept/claim/fact
+        try:
+            pec2f_nodes = self.knowledge_graph.ingest(
+                content,
+                source_memory_id=memory.id,
+            )
+            if pec2f_nodes:
+                memory.metadata['pec2f_nodes'] = len(pec2f_nodes)
+                node_types = [n.node_type.value for n in pec2f_nodes]
+                logger.debug(f"PEC2F: extracted {len(pec2f_nodes)} nodes ({node_types}) from memory {memory.id}")
+        except Exception as e:
+            logger.warning(f"PEC2F extraction failed: {e}")
+
         return EncodeResult(
             memory=memory,
             action='encoded',
@@ -414,6 +444,28 @@ class Brain:
         for res in ranked_results:
             if isinstance(res.memory, EpisodicMemory):
                 self.cognitive_map.on_recall(res.memory.id)
+
+        # 5f. v0.10: Associative network — spread activation from query entities
+        #     to find related concepts and boost memories connected via graph
+        try:
+            query_words = [w for w in query.split() if w[0:1].isupper() and len(w) > 1]
+            if query_words:
+                spread_result = self.associative_net.activate_and_spread(
+                    query_words, initial_activation=0.8, max_depth=2
+                )
+                # Store activated context for downstream use
+                if spread_result.activated_nodes:
+                    activated_labels = [
+                        self.associative_net._nodes[nid].label
+                        for nid, act in spread_result.activated_nodes[:10]
+                        if nid in self.associative_net._nodes
+                    ]
+                    # Attach graph context to results metadata
+                    for res in ranked_results:
+                        if hasattr(res.memory, 'metadata'):
+                            res.memory.metadata['_graph_context'] = activated_labels[:5]
+        except Exception as e:
+            logger.debug(f"Associative spread during recall: {e}")
                 
         # 6. Metamemory assessment
         confidence = self.metamemory.assess(query, ranked_results)
@@ -735,7 +787,7 @@ class Brain:
         consol_stats = self.consolidation.get_statistics()
         return {
             "agent_id": self.config.agent_id,
-            "version": "0.4.0",
+            "version": "0.10.0",
             "episodic_count": self.episodic_count,
             "semantic_count": self.semantic_count,
             "procedural_count": self.procedural_count,
