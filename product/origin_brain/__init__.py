@@ -65,6 +65,7 @@ from .associative_network import AssociativeNetwork, AssociativeNetworkConfig
 from .pec2f import PEC2FEngine, PEC2FNodeType
 from .entropy_monitor import AttentionEntropyMonitor, EntropyConfig, EntropyState
 from .rl_policy import RLMemoryPolicy, RLPolicyConfig, MemoryAction
+from .rl_gate import RLEncodingGate, RLGateConfig
 from .hypergraph import HypergraphMemory, HypergraphConfig
 
 __all__ = [
@@ -117,6 +118,8 @@ __all__ = [
     "RLMemoryPolicy",
     "RLPolicyConfig",
     "MemoryAction",
+    "RLEncodingGate",
+    "RLGateConfig",
     "HypergraphMemory",
     "HypergraphConfig",
 ]

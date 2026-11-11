@@ -29,6 +29,7 @@ from .neurogenesis import NeurogenesisEngine, NeurogenesisConfig
 from .neuromodulation import NeuromodulationEngine, NeuromodulationConfig
 from .entropy_monitor import AttentionEntropyMonitor, EntropyConfig
 from .rl_policy import RLMemoryPolicy, RLPolicyConfig, MemoryAction, MemoryState as RLMemoryState
+from .rl_gate import RLEncodingGate, RLGateConfig
 
 logger = logging.getLogger(__name__)
 
@@ -168,6 +169,9 @@ class Brain:
         from .hypergraph import HypergraphMemory, HypergraphConfig
         self.hypergraph = HypergraphMemory(config=HypergraphConfig())
 
+        # v0.11: RL Encoding Gate — active RL-gated encode decisions with deferred reward
+        self.rl_gate = RLEncodingGate(policy=self.rl_policy, config=RLGateConfig())
+
         # v0.5: Persistent storage
         if self.config.storage_path:
             from .storage import SQLiteStorage
@@ -245,6 +249,26 @@ class Brain:
         boosted_salience *= neuro_modifier
         # Clamp
         boosted_salience = min(1.0, boosted_salience)
+
+        # 4b. RL Encoding Gate — learned decision on whether to encode
+        #     Compute quick similarity to existing memories for RL state
+        _best_sim = 0.0
+        existing_memories = list(self.hippocampus._episodic_store.values())
+        if existing_memories:
+            sims = [jaccard_similarity(content, m.content) for m in existing_memories[-20:]]
+            _best_sim = max(sims) if sims else 0.0
+
+        rl_decision = self.rl_gate.pre_encode(
+            content=content,
+            similarity_to_best=_best_sim,
+            salience=boosted_salience,
+            entropy_state=self.entropy_monitor.get_state(),
+            memory_count=self.episodic_count,
+            wm_full=self.working_memory.is_full,
+        )
+        # Note: In early phase (heuristic mode), the gate defaults to ENCODE
+        # for novel content and doesn't block the pipeline. Once RL has enough
+        # training data, it can actively skip/consolidate.
         
         # 5. Reconsolidation check
         recon_result = self.reconsolidation.process_new_input(content, ctx, jaccard_similarity)
@@ -297,6 +321,9 @@ class Brain:
         memory.metadata['emotional_arousal'] = emotional_tag.arousal
         memory.metadata['surprise_score'] = prediction.surprise_score
         memory.metadata['encoding_strength'] = prediction.encoding_strength
+
+        # 7b. Link RL decision to the encoded memory for deferred reward
+        self.rl_gate.post_encode(rl_decision, memory_id=memory.id)
 
         # 8. Temporal context binding (Pillar 2)
         # Create a simple feature vector from the memory's sparse embedding
@@ -481,6 +508,15 @@ class Brain:
         for res in ranked_results:
             if isinstance(res.memory, EpisodicMemory):
                 self.entropy_monitor.record_retrieval(res.memory.id)
+
+        # 5e3. RL Gate: deliver deferred reward for retrieved memories
+        for rank, res in enumerate(ranked_results):
+            if isinstance(res.memory, EpisodicMemory):
+                self.rl_gate.on_retrieval(
+                    memory_id=res.memory.id,
+                    retrieval_rank=rank,
+                    confidence=res.relevance_score,
+                )
 
         # 5f. v0.10: Associative network — spread activation from query entities
         #     to find related concepts and boost memories connected via graph
@@ -850,6 +886,7 @@ class Brain:
             "working_memory": self.working_memory.get_statistics(),
             "entropy_monitor": self.entropy_monitor.get_statistics(),
             "rl_policy": self.rl_policy.get_statistics(),
+            "rl_gate": self.rl_gate.get_statistics(),
         }
         
     def add_reminder(self, content: str, trigger_type: ProspectiveMemoryType, trigger_condition: str, trigger_time: Optional[datetime] = None) -> ProspectiveMemory:
