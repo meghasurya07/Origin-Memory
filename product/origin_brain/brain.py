@@ -27,6 +27,7 @@ from .pattern_completion import PatternCompletionEngine, PatternCompletionConfig
 from .working_memory import WorkingMemoryEngine, WorkingMemoryConfig
 from .neurogenesis import NeurogenesisEngine, NeurogenesisConfig
 from .neuromodulation import NeuromodulationEngine, NeuromodulationConfig
+from .entropy_monitor import AttentionEntropyMonitor, EntropyConfig
 
 logger = logging.getLogger(__name__)
 
@@ -155,6 +156,9 @@ class Brain:
         # v0.10: PEC2F knowledge schema — provenance-aware claim/fact separation
         from .pec2f import PEC2FEngine
         self.knowledge_graph = PEC2FEngine()
+
+        # v0.10.1: Attention Entropy Monitor — SleepGate-inspired consolidation triggers
+        self.entropy_monitor = AttentionEntropyMonitor(config=EntropyConfig())
 
         # v0.5: Persistent storage
         if self.config.storage_path:
@@ -363,6 +367,17 @@ class Brain:
         except Exception as e:
             logger.warning(f"PEC2F extraction failed: {e}")
 
+        # 17. v0.10.1: Entropy monitoring — track encode event for consolidation triggers
+        try:
+            self.entropy_monitor.record_encode(
+                memory_id=memory.id,
+                had_interference=len(interference_events) > 0,
+                wm_displacement=self.working_memory.is_full,
+                schema_matched=bool(schema_matches and schema_matches[0][1] > 0.6),
+            )
+        except Exception as e:
+            logger.warning(f"Entropy monitor recording failed: {e}")
+
         return EncodeResult(
             memory=memory,
             action='encoded',
@@ -444,6 +459,11 @@ class Brain:
         for res in ranked_results:
             if isinstance(res.memory, EpisodicMemory):
                 self.cognitive_map.on_recall(res.memory.id)
+
+        # 5e2. Entropy monitor: record retrieval for access distribution tracking
+        for res in ranked_results:
+            if isinstance(res.memory, EpisodicMemory):
+                self.entropy_monitor.record_retrieval(res.memory.id)
 
         # 5f. v0.10: Associative network — spread activation from query entities
         #     to find related concepts and boost memories connected via graph
@@ -676,6 +696,9 @@ class Brain:
         # Decay neocortical associations and world model transitions
         self.neocortex.decay()
         self.world_model.decay()
+
+        # v0.10.1: Reset entropy pressure after consolidation
+        self.entropy_monitor.on_consolidation_complete()
         
         logger.info(
             f"Sleep cycle complete: consolidated={report.total_consolidated}, "
@@ -808,6 +831,7 @@ class Brain:
             "reconstruction": self.reconstruction.get_statistics(),
             "pattern_completion": self.pattern_completion.get_statistics(),
             "working_memory": self.working_memory.get_statistics(),
+            "entropy_monitor": self.entropy_monitor.get_statistics(),
         }
         
     def add_reminder(self, content: str, trigger_type: ProspectiveMemoryType, trigger_condition: str, trigger_time: Optional[datetime] = None) -> ProspectiveMemory:

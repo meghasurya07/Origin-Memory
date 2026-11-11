@@ -63,6 +63,7 @@ from .world_model import WorldModelEngine, WorldModelConfig
 from .temporal_invalidation import TemporalInvalidationEngine
 from .associative_network import AssociativeNetwork, AssociativeNetworkConfig
 from .pec2f import PEC2FEngine, PEC2FNodeType
+from .entropy_monitor import AttentionEntropyMonitor, EntropyConfig, EntropyState
 
 __all__ = [
     # Core API
@@ -108,5 +109,8 @@ __all__ = [
     "AssociativeNetworkConfig",
     "PEC2FEngine",
     "PEC2FNodeType",
+    "AttentionEntropyMonitor",
+    "EntropyConfig",
+    "EntropyState",
 ]
 
