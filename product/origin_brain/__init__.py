@@ -8,7 +8,7 @@ encode, consolidate, retrieve, and strategically forget information the way
 the human brain does.
 """
 
-__version__ = "0.10.0"
+__version__ = "0.11.0"
 
 # Core
 from .models import (
@@ -64,6 +64,7 @@ from .temporal_invalidation import TemporalInvalidationEngine
 from .associative_network import AssociativeNetwork, AssociativeNetworkConfig
 from .pec2f import PEC2FEngine, PEC2FNodeType
 from .entropy_monitor import AttentionEntropyMonitor, EntropyConfig, EntropyState
+from .rl_policy import RLMemoryPolicy, RLPolicyConfig, MemoryAction
 
 __all__ = [
     # Core API
@@ -112,5 +113,8 @@ __all__ = [
     "AttentionEntropyMonitor",
     "EntropyConfig",
     "EntropyState",
+    "RLMemoryPolicy",
+    "RLPolicyConfig",
+    "MemoryAction",
 ]
 

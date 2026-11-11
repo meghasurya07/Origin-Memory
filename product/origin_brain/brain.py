@@ -28,6 +28,7 @@ from .working_memory import WorkingMemoryEngine, WorkingMemoryConfig
 from .neurogenesis import NeurogenesisEngine, NeurogenesisConfig
 from .neuromodulation import NeuromodulationEngine, NeuromodulationConfig
 from .entropy_monitor import AttentionEntropyMonitor, EntropyConfig
+from .rl_policy import RLMemoryPolicy, RLPolicyConfig, MemoryAction, MemoryState as RLMemoryState
 
 logger = logging.getLogger(__name__)
 
@@ -160,6 +161,9 @@ class Brain:
         # v0.10.1: Attention Entropy Monitor — SleepGate-inspired consolidation triggers
         self.entropy_monitor = AttentionEntropyMonitor(config=EntropyConfig())
 
+        # v0.11: RL Memory Policy — learned encode/skip/update/evict decisions
+        self.rl_policy = RLMemoryPolicy(config=RLPolicyConfig())
+
         # v0.5: Persistent storage
         if self.config.storage_path:
             from .storage import SQLiteStorage
@@ -172,7 +176,7 @@ class Brain:
         # Backward-compatible context buffer (delegates to working memory)
         self.context_buffer: Dict[str, Any] = {}
 
-        logger.info(f"Origin Brain v0.9 initialized for agent: {self.config.agent_id}")
+        logger.info(f"Origin Brain v0.11 initialized for agent: {self.config.agent_id}")
 
     @property
     def agent_id(self) -> str:
@@ -810,7 +814,7 @@ class Brain:
         consol_stats = self.consolidation.get_statistics()
         return {
             "agent_id": self.config.agent_id,
-            "version": "0.10.0",
+            "version": "0.11.0",
             "episodic_count": self.episodic_count,
             "semantic_count": self.semantic_count,
             "procedural_count": self.procedural_count,
@@ -832,6 +836,7 @@ class Brain:
             "pattern_completion": self.pattern_completion.get_statistics(),
             "working_memory": self.working_memory.get_statistics(),
             "entropy_monitor": self.entropy_monitor.get_statistics(),
+            "rl_policy": self.rl_policy.get_statistics(),
         }
         
     def add_reminder(self, content: str, trigger_type: ProspectiveMemoryType, trigger_condition: str, trigger_time: Optional[datetime] = None) -> ProspectiveMemory:
