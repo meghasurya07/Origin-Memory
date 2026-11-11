@@ -164,6 +164,10 @@ class Brain:
         # v0.11: RL Memory Policy — learned encode/skip/update/evict decisions
         self.rl_policy = RLMemoryPolicy(config=RLPolicyConfig())
 
+        # v0.11: Hypergraph Memory — n-ary relational fabric (HGMem ICML 2026)
+        from .hypergraph import HypergraphMemory, HypergraphConfig
+        self.hypergraph = HypergraphMemory(config=HypergraphConfig())
+
         # v0.5: Persistent storage
         if self.config.storage_path:
             from .storage import SQLiteStorage
@@ -381,6 +385,15 @@ class Brain:
             )
         except Exception as e:
             logger.warning(f"Entropy monitor recording failed: {e}")
+
+        # 18. v0.11: Hypergraph — extract n-ary relational hyperedges
+        try:
+            hyperedge_ids = self.hypergraph.ingest_text(content, source_memory_id=memory.id)
+            if hyperedge_ids:
+                memory.metadata['hyperedge_count'] = len(hyperedge_ids)
+                logger.debug(f"Hypergraph: {len(hyperedge_ids)} hyperedges from memory {memory.id}")
+        except Exception as e:
+            logger.warning(f"Hypergraph extraction failed: {e}")
 
         return EncodeResult(
             memory=memory,

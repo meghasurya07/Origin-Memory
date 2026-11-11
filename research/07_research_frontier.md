@@ -366,3 +366,77 @@ No amount of improvement to any single factor (e.g., better embeddings) can matc
 - CTM-AI: Conscious Turing Machine with decentralized info competition
 - MEM Architecture: Motivated Emotional Mind with semblion-based associative memory
 - "A Mind Cannot Be Smeared Across Time": Chord vs Arpeggio hypothesis for temporal binding
+
+
+---
+
+## Nov 2026 Deep Dive: RL Memory Policy Landscape
+
+### Status: IMPLEMENTED (v0.11.0)
+
+We now have a working RL memory controller. This section documents what we
+learned and what's next.
+
+### MemAgent (ICLR 2026 Oral — ByteDance/Tsinghua)
+- Free-form text-generation action space: LLM rewrites entire memory buffer
+- RLVR: binary reward (exact match)
+- Multi-Conv DAPO training on Qwen2.5-7B/14B
+- **8K context → 3.5M+ token extrapolation** with <10% loss
+- RULER NIAH: >95% at 512K context
+- GitHub: BytedTsinghua-SIA/MemAgent
+
+### Mem-α (Wang et al., 2025)
+- Discrete tool actions: Write/Update/Delete/Route across 3 memory tiers
+  (Core, Episodic, Semantic — matches our architecture!)
+- GRPO training (no KL penalty) on Qwen3-4B
+- 32 H100 GPUs, ~3 days, 205 steps
+- **30K → 400K+ extrapolation** (13×)
+- MemoryAgentBench: 0.592 vs baselines 0.461-0.502
+- GitHub: wangyu-ustc/Mem-alpha
+
+### Memory-R1 (ACL — Sikuan Yan et al.)
+- ADD/UPDATE/DELETE/NOOP action space (exactly what we implemented!)
+- Only **152 training QA pairs** — extremely data-efficient
+- LoCoMo, MSC, LongMemEval benchmarks
+- Shows massive improvement over Mem0 and Zep
+- GitHub: yansikuan/memory-r1
+
+### AgeMem (January 2026)
+- Unified STM + LTM management (7 tool actions)
+- 3-stage progressive RL training (a curriculum we should adopt)
+- Step-wise GRPO for sparse rewards
+- GitHub: y1y5/AgeMem
+
+### ReMemR1 (ICLR 2026)
+- Adds CALLBACK mechanism: non-linear memory access (revisit past states)
+- Multi-level rewards: trajectory + step-level
+- Better multi-hop reasoning via non-linear access
+
+### Our Position
+We have implemented the SAME action space as Memory-R1 (the most data-efficient
+approach) but using tabular Q-learning instead of full LLM GRPO. This gives us:
+1. **No GPU required** — trains on CPU in seconds
+2. **Interpretable** — Q-table can be inspected directly
+3. **Edge-deployable** — works without LLM inference
+4. **Upgradable** — can swap to DQN/PPO when scale warrants
+
+### Next Steps for RL
+1. **Online training loop**: Wire RL policy into Brain.encode() as a gating
+   decision (currently it's a parallel observer, not yet a gate)
+2. **Deferred reward**: When a recalled memory was previously decided by the RL
+   policy, feed the retrieval quality back as reward
+3. **Curriculum training**: Implement AgeMem-style 3-stage progressive RL
+4. **Benchmark comparison**: Run LoCoMo with RL-gated encoding vs heuristic
+5. **DQN upgrade**: When Q-table exceeds 10K states, switch to neural Q-network
+
+### Hypergraph Memory (HGMem, ICML 2026) — IMPLEMENTED
+N-ary relational memory is now operational. Compared to our existing
+AssociativeNetwork (pairwise edges), the HypergraphMemory captures:
+- Multi-entity events as single atomic relations
+- Meeting(A,B,C,Place,Time) instead of 10 binary edges
+- More efficient spreading activation (group-level)
+- Incidence matrix for algebraic graph operations
+
+Integration with AssociativeNetwork: Both coexist. The pairwise graph handles
+fine-grained entity-relation-entity triples. The hypergraph handles complex
+n-ary events. Recall can query both and merge context.

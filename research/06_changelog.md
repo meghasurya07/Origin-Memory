@@ -207,3 +207,64 @@
 - FrontierMemory 1.0 benchmark: Letta's new standard (15 tasks, 750 trajectories)
 - SleepGate: attention-entropy triggered consolidation cycles
 - PEC2F schema (CogMem): Person-Event-Concept-Claim-Fact provenance graph
+
+
+---
+
+## v0.11.0 (2026-11-11) — RL Memory Policy + Hypergraph Memory + Entropy Monitor
+
+**568 tests | 38 modules | ~13,500 lines | CI ✅**
+
+### Attention Entropy Monitor (SleepGate-inspired)
+- `entropy_monitor.py`: ~355 lines
+- Monitors 4 information-theoretic metrics of the memory system:
+  1. Memory Entropy: Shannon entropy over access distribution (H = -Σ pᵢlog₂pᵢ / log₂n)
+  2. Interference Rate: windowed conflict rate during encoding
+  3. Working Memory Churn: displacement rate tracking
+  4. Schema Coverage: how well existing schemas cover new input
+- Accumulates sleep pressure [0,1] — consolidation triggered when pressure > 0.7
+- Brain analogue: locus coeruleus NE system + adenosine sleep pressure
+- Brain integration: encode step 17, recall retrieval tracking, sleep() reset
+- 38 unit tests
+
+### RL Memory Policy (MemAgent/Mem-α inspired) — THE BREAKTHROUGH
+- `rl_policy.py`: ~500 lines
+- Action space: ENCODE | UPDATE | SKIP | EVICT | CONSOLIDATE
+- State: 10-feature vector (novelty, salience, entropy, interference, pressure, etc.)
+- Discretized into tabular Q-table for efficient learning
+- ε-greedy exploration with exponential decay
+- Experience replay buffer with mini-batch updates
+- Reward signal: recall_accuracy + confidence_bonus - memory_cost - interference_penalty
+- Heuristic fallback → adaptive RL transition when enough data
+- Q-table persistence (save/load from JSON)
+- Policy summary: interpretable action preferences per state archetype
+- Brain analogue: dopaminergic VTA reward prediction error + basal ganglia Go/NoGo
+- 55 unit tests + 41/41 benchmark (Experiment 09)
+
+### Hypergraph Memory (HGMem ICML 2026)
+- `hypergraph.py`: ~450 lines
+- N-ary relational hyperedges: captures "Alice, Bob, Charlie met at Cafe on Tuesday"
+  as ONE atomic relation instead of 10+ pairwise edges
+- Spreading activation through hyperedges (larger groups → less spread per node)
+- Query by node overlap (Jaccard scoring with min threshold)
+- Hebbian strengthening/weakening
+- Clique expansion (convert to pairwise for standard graph algorithms)
+- Automatic text extraction with relation classification (12 relation types)
+- Incidence matrix computation
+- Brain analogue: hippocampal indexing theory (one trace binds many cortical reps)
+- Brain integration: encode step 18
+- 46 unit tests
+
+### RL Research Scan (Nov 2026 Deep Dive)
+Key papers analyzed and informing our design:
+| Paper | Action Space | Reward | Training | Extrapolation |
+|-------|-------------|--------|----------|---------------|
+| MemAgent (ICLR 2026) | Free-form memory rewrite | Binary EM | Multi-Conv DAPO | 8K → 3.5M |
+| Mem-α (2025) | Write/Update/Delete/Route | QA accuracy | GRPO | 30K → 400K+ |
+| Memory-R1 (ACL) | ADD/UPDATE/DELETE/NOOP | EM/F1 | GRPO | Multi-session |
+| AgeMem (2026) | 7 STM+LTM tools | Step-wise GRPO | 3-stage progressive | Long-horizon |
+| ReMemR1 (ICLR 2026) | Update + callback | Multi-level | RLMLR | Long-context |
+
+Key insight: Our tabular Q-learning is a lightweight version of these full LLM-RL
+approaches. It can learn the SAME decision patterns without requiring GPU training,
+making it practical for edge deployment. The next step is DQN or PPO when scale warrants.
