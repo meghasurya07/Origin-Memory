@@ -144,6 +144,10 @@ class Brain:
         from .world_model import WorldModelEngine, WorldModelConfig
         self.world_model = WorldModelEngine(config=WorldModelConfig())
 
+        # v0.9: Temporal invalidation — bi-temporal fact management
+        from .temporal_invalidation import TemporalInvalidationEngine
+        self.temporal_facts = TemporalInvalidationEngine()
+
         # v0.5: Persistent storage
         if self.config.storage_path:
             from .storage import SQLiteStorage
@@ -156,7 +160,7 @@ class Brain:
         # Backward-compatible context buffer (delegates to working memory)
         self.context_buffer: Dict[str, Any] = {}
 
-        logger.info(f"Origin Brain v0.8 initialized for agent: {self.config.agent_id}")
+        logger.info(f"Origin Brain v0.9 initialized for agent: {self.config.agent_id}")
 
     @property
     def agent_id(self) -> str:
@@ -320,6 +324,14 @@ class Brain:
 
         # 13. Allocate engram trace (neural ensemble for this memory)
         self.engram_engine.allocate_engram(memory.id)
+
+        # 14. v0.9: Extract temporal facts and detect contradictions
+        extracted_facts = self.temporal_facts.extract_facts(content, source_memory_id=memory.id)
+        for fact in extracted_facts:
+            was_conflict, invalidated_id = self.temporal_facts.register_fact(fact)
+            if was_conflict and invalidated_id:
+                memory.metadata['superseded_fact'] = invalidated_id
+                logger.info(f"Fact supersession: {fact.subject}.{fact.predicate} = {fact.object} (replaced {invalidated_id})")
 
         return EncodeResult(
             memory=memory,

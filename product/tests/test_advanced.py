@@ -239,10 +239,31 @@ class TestMetamemory:
 
     def test_assess_high_confidence(self):
         engine = MetamemoryEngine()
-        results = [self._make_result(f"Fact {i}", 0.9) for i in range(5)]
+        # v0.9: Identical content = high agreement, so not contradictory
+        # even with high entropy (many equally relevant memories)
+        results = [self._make_result("The capital of France is Paris", 0.9) for _ in range(5)]
         assessment = engine.assess("test query", results)
         assert assessment.confidence_score > 0.5
         assert assessment.has_relevant_memories is True
+        assert assessment.agreement_score > 0.9  # Identical content = perfect agreement
+        assert not assessment.contradiction_detected  # Agreement overrides entropy
+
+    def test_assess_contradiction_detected(self):
+        """v0.9: Contradiction requires both high entropy AND low agreement."""
+        engine = MetamemoryEngine()
+        # Truly different content with minimal word overlap = low Jaccard
+        results = [
+            self._make_result("Paris is beautiful in spring", 0.9),
+            self._make_result("London has excellent museums", 0.9),
+            self._make_result("Berlin nightlife attracts tourists", 0.9),
+            self._make_result("Tokyo cuisine features sushi ramen", 0.9),
+            self._make_result("Moscow winters are extremely cold", 0.9),
+        ]
+        assessment = engine.assess("test query", results)
+        assert assessment.belief_entropy > 0.7  # High entropy
+        assert assessment.agreement_score < 0.5  # Low agreement (no shared words)
+        assert assessment.contradiction_detected is True
+        assert assessment.confidence_level == ConfidenceLevel.GUESSING
 
     def test_assess_no_results(self):
         engine = MetamemoryEngine()
