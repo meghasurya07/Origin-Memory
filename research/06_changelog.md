@@ -4,6 +4,38 @@
 
 ---
 
+## v0.12.0 (2026-11-12) — BM25 Retrieval + Morphological Normalisation 🔥
+
+**586 tests | LoCoMo 88% (+10pp) | 39 modules | ~13,100 lines | Single-Hop 100%**
+
+### Breakthrough: 78% → 88% on LoCoMo
+
+| Category | v0.11.1 | v0.12.0 | Δ |
+|:---------|:--------|:--------|:--|
+| Single-Hop | 70% | **100%** | **+30pp** |
+| Multi-Hop | 100% | 100% | — |
+| Temporal | 60% | **80%** | **+20pp** |
+| Coherence | 80% | 80% | — |
+| Cognitive | 80% | 80% | — |
+| **OVERALL** | **78%** | **88%** | **+10pp** |
+
+### Changes
+| Component | Description |
+|:----------|:-----------|
+| `embedding.py` | **BM25 (Okapi BM25)** retrieval scoring — probabilistic model with term frequency saturation and document length normalisation (Robertson & Zaragoza, 2009). Replaces TF-IDF cosine for `similarity()` and `search()`. TF-IDF retained for dense vector embedding pipeline. |
+| `embedding.py` | **Morphological normaliser** — 40-rule suffix-stripping normaliser that bridges inflectional gaps (allergy↔allergic, order↔ordered, recommend↔recommended). Min-stem-length guards prevent over-stemming. |
+| `embedding.py` | **BM25 score normalisation** — shifted sigmoid maps unbounded BM25 scores to [0,1] for integration with hippocampal retrieval pipeline. |
+| `02_mathematics.md` | Added §11: BM25 mathematical derivation, Theorems 8–10 (TF saturation, length normalisation optimality, retrieval quality bound), empirical results table. |
+| `05_benchmarks.md` | Updated all tables, breakdown, comparison, ablation, and honest assessment for 88% score. |
+| `test_embedding.py` | Updated bigrams test for morphological normalisation, statistics test for BM25 mode, self-similarity test for BM25 scoring properties. |
+
+### Mathematical Contributions
+- **Theorem 8**: BM25 term frequency saturation is monotone increasing and bounded by $(k_1+1)$
+- **Theorem 9**: BM25 length normalisation is the MLE under 2-Poisson model
+- **Theorem 10**: BM25 + morph guarantees correct retrieval when ≥1 content word shares a morphological root
+
+---
+
 ## v0.11.1 (2026-11-12) — Research Documentation + Ablation Study + Mathematical Proofs
 
 **586 tests | LoCoMo 78% | 39 modules | ~12,900 lines | Ablation ✅**

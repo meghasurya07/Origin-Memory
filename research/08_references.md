@@ -159,3 +159,25 @@
 | Free energy: $F = D_{KL}[q(s|o) \| p(s)] - \ln p(o|s)$ | Friston (2005) | `prediction.py` |
 | Q-learning: $Q(s,a) \leftarrow Q(s,a) + \alpha[r + \gamma \max_{a'} Q(s',a') - Q(s,a)]$ | Watkins (1992) | `rl_policy.py` |
 | Shannon entropy: $H(\mathbf{p}) = -\sum p_i \log_2 p_i$ | Shannon (1948) | `entropy_monitor.py` |
+
+
+### Information Retrieval — BM25 and Probabilistic Models (v0.12.0)
+
+- Robertson, S.E. & Zaragoza, H. (2009). "The Probabilistic Relevance Framework: BM25 and Beyond." *Foundations and Trends in Information Retrieval*, 3(4), 333–389. — **The definitive BM25 reference.**
+- Robertson, S.E. & Walker, S. (1994). "Some Simple Effective Approximations to the 2-Poisson Model for Probabilistic Weighted Retrieval." *SIGIR '94*. — Derives BM25's length normalisation from 2-Poisson model.
+- Robertson, S.E. & Spärck Jones, K. (1976). "Relevance Weighting of Search Terms." *Journal of the American Society for Information Science*, 27(3), 129–146. — The RSJ IDF weighting used in BM25.
+- Harter, S.P. (1975). "A Probabilistic Approach to Automatic Keyword Indexing." *JASIS*, 26(4), 197–206. — The 2-Poisson term frequency distribution underlying BM25.
+- Hunt, R.R. & Worthen, J.B. (2006). *Distinctiveness and Memory*. Oxford University Press. — Distinctiveness principle in human memory retrieval.
+
+### Morphological Processing — Neurolinguistic Basis
+
+- Bozic, M., Marslen-Wilson, W.D., et al. (2010). "Differentiating Morphology, Form, and Meaning: Neural Correlates of Morphological Complexity." *Journal of Cognitive Neuroscience*, 22(7), 1481–1497. — Left inferior frontal gyrus morphological decomposition.
+- Marslen-Wilson, W.D., Bozic, M., & Randall, B. (2008). "Early Decomposition in Visual Word Recognition: Dissociating Morphology, Form, and Meaning." *Language and Cognitive Processes*, 23(3), 394–421. — Automatic morphological stripping during lexical access.
+
+### Key Equations (v0.12.0 additions)
+
+| Equation | Source | Used In |
+|:---------|:-------|:--------|
+| BM25(Q,D) = Σ IDF(t) · f(t,D)(k₁+1) / [f(t,D) + k₁(1-b+b·\|D\|/avgdl)] | Robertson & Zaragoza 2009 | `embedding.py:_bm25_score()` |
+| IDF(t) = ln((N-df+0.5)/(df+0.5)+1) | Robertson & Spärck Jones 1976 | `embedding.py:_bm25_idf()` |
+| σ(s) = 2/(1+e^{-0.8s}) - 1 | Custom (calibrated on corpus) | `embedding.py:_bm25_score()` normalisation |
