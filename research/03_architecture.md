@@ -262,3 +262,209 @@ To facilitate accelerated, one-shot learning (mirroring human vmPFC function), t
   - `object` (*string*, required): Target entity or assertion value.
   - `source` (*string*, optional): Provenance, URL, or citation origin.
   - `confidence` (*number*, optional): Subjective certainty / calibration score in $[0, 1]$.
+
+
+---
+
+## 11. New Modules (v0.9–v0.11.0, November 2026)
+
+The following modules were added between v0.9 and v0.11.0, expanding the encode pipeline from 7 steps to 18 steps and adding 6 new cognitive capabilities.
+
+### 11.1 Temporal Invalidation Engine (v0.9)
+**Brain analogue:** Prefrontal cortex temporal monitoring  
+**File:** `temporal_invalidation.py` (304 lines)  
+**Purpose:** Detects when newer facts contradict older ones and marks the older fact as superseded.
+
+**Mathematical formulation:** For a new fact $f_{new} = (s, p, o_{new}, t_{new})$ and existing fact $f_{old} = (s, p, o_{old}, t_{old})$ with the same subject $s$ and predicate $p$:
+
+$$\text{supersede}(f_{old}, f_{new}) = \begin{cases} \text{True} & \text{if } t_{new} > t_{old} \wedge o_{new} \neq o_{old} \\ \text{False} & \text{otherwise} \end{cases}$$
+
+When supersession occurs, $f_{old}$ is marked invalid and recall queries return $f_{new}$ preferentially. This implements *belief revision* — the memory system updates its world model when new evidence contradicts prior beliefs.
+
+**Encode pipeline step:** 14. Extract temporal facts → register → detect contradictions.
+
+### 11.2 Belief Entropy Metamemory (v0.9)
+**Brain analogue:** Anterior cingulate cortex (conflict monitoring)  
+**File:** `metamemory.py` (264 lines)  
+**Purpose:** Provides confidence calibration for recall results based on retrieval dynamics.
+
+**Key metric:** The metamemory assessment includes:
+- **Overall confidence** $\in [0, 1]$: Weighted combination of retrieval strength, source consistency, and temporal recency.
+- **Feeling-of-knowing** judgment: Based on partial activation of related memories without full retrieval.
+- **Retrieval fluency**: Faster retrieval → higher confidence (mirrors human metacognition).
+
+### 11.3 Associative Memory Network (v0.10)
+**Brain analogue:** Temporal lobe association cortex  
+**File:** `associative_network.py` (824 lines)  
+**Purpose:** Builds an entity-relation graph from encoded text and supports spreading activation for associative recall.
+
+**Mathematical formulation:**
+- **Graph construction:** Extract entities and relations via rule-based NER + dependency parsing. Nodes = entities, edges = relations with weights.
+- **Spreading activation** (Collins & Loftus 1975):
+  $$a_j^{(t+1)} = \sum_{i \in \mathcal{N}(j)} w_{ij} \cdot a_i^{(t)} \cdot d^{-\text{dist}(i,j)}$$
+  where $a_j^{(t)}$ is activation of node $j$ at step $t$, $w_{ij}$ is edge weight, and $d$ is a decay factor.
+- **Hebbian learning:** Co-activated nodes strengthen their connection:
+  $$\Delta w_{ij} = \eta \cdot a_i \cdot a_j$$
+
+**Encode pipeline step:** 15. Extract entities/relations → build graph edges → link to memory ID.
+
+### 11.4 PEC2F Knowledge Schema (v0.10)
+**Brain analogue:** Ventromedial prefrontal cortex (semantic categorization)  
+**File:** `pec2f.py` (590 lines)  
+**Purpose:** Classifies encoded content into 5 knowledge types (Person, Event, Concept, Claim, Fact) and builds a typed knowledge graph with contradiction detection.
+
+**Type taxonomy:**
+| Type | Pattern | Example |
+|:-----|:--------|:--------|
+| Person | Name + role/relation | "Bob is a ML engineer at Meta" |
+| Event | Temporal marker + action | "Alice adopted Luna last weekend" |
+| Concept | Definition/explanation | "WebAssembly is a binary format" |
+| Claim | Opinion/uncertain | "Bob thinks Meta has better WLB" |
+| Fact | Verifiable assertion | "Alice is allergic to shellfish" |
+
+**Contradiction detection:** When two nodes share the same subject and predicate but differ in object, the system flags a contradiction and invokes the temporal invalidation engine.
+
+**Encode pipeline step:** 16. Classify content → extract PEC2F nodes → detect contradictions.
+
+### 11.5 Attention Entropy Monitor (v0.10.1)
+**Brain analogue:** Locus coeruleus (arousal/alertness regulation)  
+**File:** `entropy_monitor.py` (292 lines)  
+**Purpose:** Tracks the Shannon entropy of memory access patterns and triggers consolidation (sleep) when entropy exceeds a threshold.
+
+**Mathematical formulation:**
+$$H(\mathbf{p}) = -\sum_{i=1}^{N} p_i \log_2 p_i$$
+
+where $p_i = f_i / \sum_j f_j$ is the normalized access frequency. Sleep pressure accumulates as:
+
+$$\text{pressure}(t) = \min\left(1.0, \frac{H(\mathbf{p}_t)}{H_{max}} + \lambda \cdot \text{interference\_rate}(t) + \mu \cdot \text{wm\_churn}(t)\right)$$
+
+When $\text{pressure} > 0.85$, the system signals that consolidation is needed.
+
+**Encode pipeline step:** 17. Record encode event → update entropy → check sleep pressure.  
+See Theorem 3 in `02_mathematics.md` for the formal optimality proof.
+
+### 11.6 RL Memory Policy (v0.11.0)
+**Brain analogue:** Basal ganglia (action selection via reward prediction)  
+**File:** `rl_policy.py` (524 lines)  
+**Purpose:** Learns an optimal memory management policy (ENCODE/UPDATE/SKIP/EVICT/CONSOLIDATE) via tabular Q-learning with experience replay.
+
+**State representation:** 10-dimensional feature vector discretized into 5 bins:
+```
+[content_novelty, emotional_intensity, schema_match, recency,
+ access_frequency, interference, wm_load, context_similarity,
+ prediction_error, stability]
+```
+
+**Q-learning update:**
+$$Q(s,a) \leftarrow Q(s,a) + \alpha \left[r + \gamma \max_{a'} Q(s', a') - Q(s,a)\right]$$
+
+**Exploration:** $\varepsilon$-greedy with decay: $\varepsilon_t = \max(0.01, \varepsilon_0 \cdot (1 - t/\tau))$  
+**Experience replay:** Buffer of 10K transitions, mini-batch size 32.
+
+See Theorem 2 in `02_mathematics.md` for convergence analysis.
+
+### 11.7 RL Encoding Gate (v0.11.0)
+**Brain analogue:** Prefrontal cortex gate (executive encoding decision)  
+**File:** `rl_gate.py` (226 lines)  
+**Purpose:** Makes the actual encode/skip decision using the RL policy, with deferred reward delivery on subsequent recall.
+
+**Pipeline:**
+1. **Pre-encode (step 4b):** RL gate evaluates state → decides ENCODE or SKIP
+2. **Post-encode (step 7b):** Links the decision to the memory ID for reward tracking
+3. **On recall (step 5e3):** Delivers deferred reward (+1 if recalled memory was useful, -1 otherwise)
+
+**Warm-start guarantee:** The gate starts in heuristic mode and transitions to learned mode only when the Q-table has sufficient coverage ($> n_{min}$ state-action pairs). This ensures the system never degrades below hand-tuned performance.
+
+### 11.8 Hypergraph Memory (v0.11.0)
+**Brain analogue:** Entorhinal cortex (relational binding)  
+**File:** `hypergraph.py` (533 lines)  
+**Purpose:** Stores n-ary relational facts as hyperedges (connecting 2+ entities simultaneously), supporting efficient multi-entity queries.
+
+**Supported relation types (12):**
+WORKS_AT, LIVES_IN, STUDIES_AT, OWNS, RELATED_TO, DISCUSSED, PLANNED, RECOMMENDED, VISITED, CREATED, PARTICIPATED_IN, MENTIONED_WITH
+
+**Key operations:**
+- **Ingest:** Extract hyperedges from text via pattern matching
+- **Query (Jaccard):** Find hyperedges containing a set of entities
+- **Spreading activation:** Propagate activation through the hypergraph
+- **Hebbian learning:** Strengthen co-activated hyperedges
+- **Clique expansion:** Decompose hyperedges into pairwise edges for graph algorithms
+- **Incidence matrix:** $B \in \{0,1\}^{|V| \times |E|}$ for efficient entity-hyperedge lookups
+
+See Theorem 4 in `02_mathematics.md` for the representation efficiency proof.
+
+---
+
+## 12. Updated Encode Pipeline (v0.11.0, 18 Steps)
+
+```
+Input → 1. Context snapshot
+      → 2. Prediction error evaluation
+      → 3. Emotional modulation (amygdala)
+      → 3b. Neuromodulation (dopamine/norepinephrine)
+      → 4. Salience scoring
+      → 4b. RL encoding gate (encode/skip decision)
+      → 5. Reconsolidation check (update existing or create new)
+      → 6. Schema matching (vmPFC)
+      → 7. Hippocampal encoding (CA1/CA3/DG)
+      → 7b. RL gate linking (associate decision with memory ID)
+      → 8. Temporal context binding (TCM)
+      → 8b. Pattern separation (DG)
+      → 9. Interference detection
+      → 10. Prospective intent extraction
+      → 11. Neuromodulator decay
+      → 12. Storage persistence
+      → 13. Engram allocation
+      → 14. Temporal fact extraction + contradiction detection
+      → 15. Associative graph construction
+      → 16. PEC2F knowledge classification
+      → 17. Entropy monitoring + sleep pressure
+      → 18. Hypergraph relational encoding
+```
+
+---
+
+## 13. Module Inventory (v0.11.0)
+
+| # | Module | File | Lines | Brain Analogue |
+|:--|:-------|:-----|:------|:---------------|
+| 1 | Brain (orchestrator) | brain.py | 928 | Whole brain |
+| 2 | Hippocampal Engine | hippocampus.py | 335 | Hippocampus |
+| 3 | Temporal Context | temporal_context.py | 334 | Entorhinal cortex |
+| 4 | Prediction Engine | prediction.py | 302 | Anterior cingulate |
+| 5 | Emotional Modulator | emotional.py | 167 | Amygdala |
+| 6 | Reconsolidation | reconsolidation.py | 187 | Memory updating |
+| 7 | Schema Engine | schemas.py | 229 | vmPFC |
+| 8 | Interference Detector | interference.py | 249 | Proactive interference |
+| 9 | Neuromodulation | neuromodulation.py | 298 | LC/VTA |
+| 10 | Decay Engine | decay.py | 165 | Synaptic pruning |
+| 11 | Sleep Engine | sleep.py | 428 | SWS/REM |
+| 12 | Consolidation Daemon | consolidation.py | 158 | Offline replay |
+| 13 | Working Memory | working_memory.py | 256 | Dorsolateral PFC |
+| 14 | Pattern Completion | pattern_completion.py | 342 | CA3 attractor |
+| 15 | Reconstruction | reconstruction.py | 466 | Generative recall |
+| 16 | Metamemory | metamemory.py | 264 | Anterior cingulate |
+| 17 | Neurogenesis | neurogenesis.py | 361 | Dentate gyrus |
+| 18 | Synaptic Plasticity | synaptic_plasticity.py | 340 | STDP/BCM/Hebb |
+| 19 | Engram | engram.py | 352 | Neural ensemble |
+| 20 | World Model | world_model.py | 317 | Internal model |
+| 21 | Cognitive Map | cognitive_map.py | 282 | Place/grid cells |
+| 22 | Prospective Memory | prospective.py | 109 | Future intentions |
+| 23 | Router | router.py | 189 | Thalamus |
+| 24 | Neocortex | neocortex.py | 319 | Semantic store |
+| 25 | Embedding | embedding.py | 264 | Feature extraction |
+| 26 | Storage | storage.py | 264 | Persistence layer |
+| 27 | Models | models.py | 153 | Data structures |
+| 28 | Associative Network | associative_network.py | 824 | Association cortex |
+| 29 | PEC2F Knowledge | pec2f.py | 590 | Semantic categorization |
+| 30 | Temporal Invalidation | temporal_invalidation.py | 304 | Belief revision |
+| 31 | Entropy Monitor | entropy_monitor.py | 292 | Locus coeruleus |
+| 32 | RL Policy | rl_policy.py | 524 | Basal ganglia |
+| 33 | RL Gate | rl_gate.py | 226 | PFC gate |
+| 34 | Hypergraph Memory | hypergraph.py | 533 | Relational binding |
+| 35 | Shared Memory | shared_memory.py | 386 | Cross-agent sync |
+| 36 | Server (API) | server.py | 387 | Interface |
+| 37 | Client | client.py | 252 | SDK |
+| 38 | Neural Embedding | neural_embedding.py | 193 | Deep features |
+| 39 | Init | __init__.py | 116 | Package root |
+| | **TOTAL** | **39 modules** | **~12,900** | |

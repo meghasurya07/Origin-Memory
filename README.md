@@ -82,31 +82,52 @@ Origin Brain implements a full computational neuroscience stack:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    ORIGIN BRAIN v0.8                        │
-├─────────────────────────────────────────────────────────────┤
-│  Working Memory    │  Attention-gated buffer (capacity: 7±2)│
-├────────────────────┼────────────────────────────────────────┤
-│  Prediction Engine │  Surprise = |actual - predicted|       │
-│                    │  Only encode what's NOVEL              │
-├────────────────────┼────────────────────────────────────────┤
-│  Hippocampus       │  Fast episodic encoding (one-shot)     │
-│                    │  Pattern separation + completion       │
-├────────────────────┼────────────────────────────────────────┤
-│  Neocortex         │  Slow statistical learning (CLS)       │
-│                    │  Schema extraction from episodes       │
-├────────────────────┼────────────────────────────────────────┤
-│  World Model       │  Predictive state transitions          │
-│                    │  Mental simulation + surprise           │
-├────────────────────┼────────────────────────────────────────┤
-│  Sleep Engine      │  SWS replay → REM integration → Prune │
-│                    │  Hippocampus → Neocortex transfer      │
-├────────────────────┼────────────────────────────────────────┤
-│  Reconstruction    │  Context-dependent generative recall   │
-│                    │  Same query → different output          │
-├────────────────────┼────────────────────────────────────────┤
-│  Shared Memory     │  Multi-agent pool with scoped access   │
-│                    │  Conflict resolution + provenance       │
-└─────────────────────────────────────────────────────────────┘
+│                    ORIGIN BRAIN v0.11                        │
+├──────────────────────┬──────────────────────────────────────┤
+│  Working Memory      │  Attention-gated buffer (7±2)        │
+├──────────────────────┼──────────────────────────────────────┤
+│  Prediction Engine   │  Surprise = |actual - predicted|     │
+│                      │  Only encode what's NOVEL            │
+├──────────────────────┼──────────────────────────────────────┤
+│  RL Encoding Gate    │  Two-stage gating: prediction +      │
+│                      │  learned RL policy (Q-learning)      │
+├──────────────────────┼──────────────────────────────────────┤
+│  Hippocampus         │  Fast episodic encoding (one-shot)   │
+│                      │  Pattern separation + completion     │
+├──────────────────────┼──────────────────────────────────────┤
+│  Neocortex           │  Slow statistical learning (CLS)     │
+│                      │  Schema extraction from episodes     │
+├──────────────────────┼──────────────────────────────────────┤
+│  Associative Network │  Spreading activation graph          │
+│                      │  Entity extraction + Hebbian links   │
+├──────────────────────┼──────────────────────────────────────┤
+│  PEC2F Knowledge     │  Person-Event-Concept-Claim-Fact     │
+│                      │  Provenance-aware knowledge graph    │
+├──────────────────────┼──────────────────────────────────────┤
+│  Hypergraph Memory   │  N-ary relational hyperedges         │
+│                      │  Multi-entity events as one trace    │
+├──────────────────────┼──────────────────────────────────────┤
+│  World Model         │  Predictive state transitions        │
+│                      │  Mental simulation + surprise        │
+├──────────────────────┼──────────────────────────────────────┤
+│  Temporal Invalid.   │  Bi-temporal fact management          │
+│                      │  Contradiction detection + history   │
+├──────────────────────┼──────────────────────────────────────┤
+│  Entropy Monitor     │  Shannon entropy, sleep pressure     │
+│                      │  Consolidation trigger detection     │
+├──────────────────────┼──────────────────────────────────────┤
+│  Sleep Engine        │  SWS replay → REM integration → Prune│
+│                      │  Hippocampus → Neocortex transfer    │
+├──────────────────────┼──────────────────────────────────────┤
+│  Reconstruction      │  Context-dependent generative recall │
+│                      │  Same query → different output       │
+├──────────────────────┼──────────────────────────────────────┤
+│  RL Memory Policy    │  Q-learning action selection         │
+│                      │  ENCODE|UPDATE|SKIP|EVICT|CONSOLIDATE│
+├──────────────────────┼──────────────────────────────────────┤
+│  Shared Memory       │  Multi-agent pool with scoped access │
+│                      │  Conflict resolution + provenance    │
+└──────────────────────┴──────────────────────────────────────┘
 ```
 
 ## 🔌 Integrations

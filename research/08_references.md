@@ -94,3 +94,68 @@
 - **Eleanor Maguire** (UCL) — Hippocampal navigation, London taxi drivers
 - **Howard Eichenbaum** (BU, deceased) — Time cells, relational memory
 - **May-Britt & Edvard Moser** (NTNU) — Grid cells, cognitive maps
+
+
+## Information Theory & Memory
+
+| Paper | Authors | Year | Key Contribution |
+|:------|:--------|:-----|:-----------------|
+| The Information Bottleneck Method | Tishby, Pereira, Bialek | 1999 | Optimal lossy compression preserving task-relevant information |
+| Rate-distortion theory | Shannon | 1959 | Fundamental limits of lossy compression |
+| Deep Variational Information Bottleneck | Alemi et al. | 2017 | Neural IB for representation learning |
+| Lost in the Middle | Liu et al. | 2023 | LLMs fail to retrieve from middle of long contexts |
+| Attention Is All You Need | Vaswani et al. | 2017 | Transformer attention (= Hopfield update) |
+
+## Modern Hopfield Networks
+
+| Paper | Authors | Year | Key Contribution |
+|:------|:--------|:-----|:-----------------|
+| Hopfield Networks Is All You Need | Ramsauer, Schäfl et al. | 2020 | Exponential capacity Modern Hopfield, Attention ≡ Hopfield identity |
+| Dense Associative Memories | Krotov & Hopfield | 2016 | Polynomial energy Hopfield with higher capacity |
+| Classical Hopfield Networks | Hopfield | 1982 | Original associative memory network, capacity N/(2 ln N) |
+
+## RL for Memory Management
+
+| Paper | Authors | Year | Key Contribution |
+|:------|:--------|:-----|:-----------------|
+| MemAgent: Leveraging LLM-Agent RL | (ICLR 2026) | 2026 | RL agent learns memory operations via GRPO |
+| Mem-α (Agentic Memory) | (NeurIPS 2025) | 2025 | Memory as learned behavior, α-transfer across tasks |
+| Memory-R1 | (ACL 2025) | 2025 | RL-trained memory with reasoning traces |
+| AgeMem (Age of Memory) | (2026) | 2026 | Temporal-aware memory management with age-based RL |
+| ReMemR1 | (ICLR 2026) | 2026 | Retrieval-enhanced memory with RL training |
+| Route to Remember | (2025) | 2025 | Routing-based memory architecture with learned policies |
+| MIRA | (2025) | 2025 | Memory-Integrated Reasoning Agent |
+| Q-learning convergence | Watkins & Dayan | 1992 | Tabular Q-learning converges to Q* for finite MDPs |
+| PAC-MDP sample complexity | Strehl, Li, Littman | 2006 | Bounds for RL sample efficiency |
+
+## Sleep & Consolidation
+
+| Paper | Authors | Year | Key Contribution |
+|:------|:--------|:-----|:-----------------|
+| Sleep and memory consolidation | Born & Wilhelm | 2012 | Two-stage consolidation model (SWS replay + REM integration) |
+| Sleep's role in memory | Walker & Stickgold | 2010 | Active systems consolidation during sleep |
+| Synaptic homeostasis hypothesis | Tononi & Cirelli | 2006 | SWS downscales synapses, enhancing signal-to-noise |
+| Predictive Processing (Free Energy) | Friston | 2005, 2010 | Memory minimizes variational free energy |
+
+## Cognitive Architecture & Memory Systems (2025–2026)
+
+| Paper | Authors | Year | Key Contribution |
+|:------|:--------|:-----|:-----------------|
+| MemoryOS | (2025) | 2025 | OS-inspired hierarchical memory for LLM agents |
+| CogMem | (2025) | 2025 | Cognitive memory with PEC2F node types |
+| HGMem | (2025) | 2025 | Hypergraph-based relational memory |
+| SleepGate | (2025) | 2025 | Entropy-triggered consolidation |
+| FrontierMemory 1.0 | Letta | 2026 | Agentic memory benchmark (trajectory + dreaming) |
+
+## Key Equations Sources
+
+| Equation | Source | Used In |
+|:---------|:-------|:--------|
+| TCM update: $\mathbf{t}_i = \rho_i \mathbf{t}_{i-1} + \beta \mathbf{t}^{IN}_i$ | Howard & Kahana (2002) | `temporal_context.py` |
+| Spaced repetition: $S_{n+1} = S_n \cdot (1 + \alpha \cdot e^{wS_n})$ | Wozniak (SuperMemo) | `decay.py` |
+| ACT-R activation: $B_i = \ln(\sum_k (t-t_k)^{-d})$ | Anderson et al. (2004) | `decay.py` |
+| Spreading activation: $a_j = \sum_i w_{ij} a_i d^{-\text{dist}}$ | Collins & Loftus (1975) | `associative_network.py` |
+| Modern Hopfield energy: $E = -\beta^{-1}\ln\sum \exp(\beta x^T\xi_i) + \frac{1}{2}\|x\|^2$ | Ramsauer et al. (2020) | `pattern_completion.py` |
+| Free energy: $F = D_{KL}[q(s|o) \| p(s)] - \ln p(o|s)$ | Friston (2005) | `prediction.py` |
+| Q-learning: $Q(s,a) \leftarrow Q(s,a) + \alpha[r + \gamma \max_{a'} Q(s',a') - Q(s,a)]$ | Watkins (1992) | `rl_policy.py` |
+| Shannon entropy: $H(\mathbf{p}) = -\sum p_i \log_2 p_i$ | Shannon (1948) | `entropy_monitor.py` |

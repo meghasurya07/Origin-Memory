@@ -1,0 +1,332 @@
+{
+  "timestamp": "2026-11-12T01:08:25.582135+00:00",
+  "version": "0.11.0",
+  "benchmark": "LoCoMo-Style (experiment 07)",
+  "full_system_score": 78.0,
+  "minimal_score": 74.0,
+  "cognitive_gain_pp": 4.0,
+  "ablations": {
+    "Full System": {
+      "single_hop": [
+        7,
+        10
+      ],
+      "multi_hop": [
+        6,
+        6
+      ],
+      "temporal": [
+        3,
+        5
+      ],
+      "coherence": [
+        4,
+        5
+      ],
+      "cognitive": [
+        4,
+        5
+      ],
+      "overall": 78.0
+    },
+    "\u2212 Temporal Context (TCM)": {
+      "single_hop": [
+        7,
+        10
+      ],
+      "multi_hop": [
+        6,
+        6
+      ],
+      "temporal": [
+        3,
+        5
+      ],
+      "coherence": [
+        4,
+        5
+      ],
+      "cognitive": [
+        4,
+        5
+      ],
+      "overall": 78.0
+    },
+    "\u2212 Emotional Modulation": {
+      "single_hop": [
+        7,
+        10
+      ],
+      "multi_hop": [
+        6,
+        6
+      ],
+      "temporal": [
+        3,
+        5
+      ],
+      "coherence": [
+        4,
+        5
+      ],
+      "cognitive": [
+        4,
+        5
+      ],
+      "overall": 78.0
+    },
+    "\u2212 Prediction Error Gate": {
+      "single_hop": [
+        7,
+        10
+      ],
+      "multi_hop": [
+        6,
+        6
+      ],
+      "temporal": [
+        3,
+        5
+      ],
+      "coherence": [
+        4,
+        5
+      ],
+      "cognitive": [
+        4,
+        5
+      ],
+      "overall": 78.0
+    },
+    "\u2212 Reconsolidation": {
+      "single_hop": [
+        7,
+        10
+      ],
+      "multi_hop": [
+        6,
+        6
+      ],
+      "temporal": [
+        3,
+        5
+      ],
+      "coherence": [
+        4,
+        5
+      ],
+      "cognitive": [
+        4,
+        5
+      ],
+      "overall": 78.0
+    },
+    "\u2212 Schema Engine": {
+      "single_hop": [
+        7,
+        10
+      ],
+      "multi_hop": [
+        6,
+        6
+      ],
+      "temporal": [
+        3,
+        5
+      ],
+      "coherence": [
+        4,
+        5
+      ],
+      "cognitive": [
+        4,
+        5
+      ],
+      "overall": 78.0
+    },
+    "\u2212 Interference Detector": {
+      "single_hop": [
+        7,
+        10
+      ],
+      "multi_hop": [
+        6,
+        6
+      ],
+      "temporal": [
+        3,
+        5
+      ],
+      "coherence": [
+        4,
+        5
+      ],
+      "cognitive": [
+        4,
+        5
+      ],
+      "overall": 78.0
+    },
+    "\u2212 Neuromodulation": {
+      "single_hop": [
+        7,
+        10
+      ],
+      "multi_hop": [
+        6,
+        6
+      ],
+      "temporal": [
+        3,
+        5
+      ],
+      "coherence": [
+        3,
+        5
+      ],
+      "cognitive": [
+        4,
+        5
+      ],
+      "overall": 74.0
+    },
+    "\u2212 Associative Graph": {
+      "single_hop": [
+        7,
+        10
+      ],
+      "multi_hop": [
+        6,
+        6
+      ],
+      "temporal": [
+        3,
+        5
+      ],
+      "coherence": [
+        4,
+        5
+      ],
+      "cognitive": [
+        4,
+        5
+      ],
+      "overall": 78.0
+    },
+    "\u2212 PEC2F Knowledge": {
+      "single_hop": [
+        7,
+        10
+      ],
+      "multi_hop": [
+        6,
+        6
+      ],
+      "temporal": [
+        3,
+        5
+      ],
+      "coherence": [
+        4,
+        5
+      ],
+      "cognitive": [
+        4,
+        5
+      ],
+      "overall": 78.0
+    },
+    "\u2212 Temporal Invalidation": {
+      "single_hop": [
+        7,
+        10
+      ],
+      "multi_hop": [
+        6,
+        6
+      ],
+      "temporal": [
+        3,
+        5
+      ],
+      "coherence": [
+        4,
+        5
+      ],
+      "cognitive": [
+        4,
+        5
+      ],
+      "overall": 78.0
+    },
+    "\u2212 Hypergraph Memory": {
+      "single_hop": [
+        7,
+        10
+      ],
+      "multi_hop": [
+        6,
+        6
+      ],
+      "temporal": [
+        3,
+        5
+      ],
+      "coherence": [
+        4,
+        5
+      ],
+      "cognitive": [
+        4,
+        5
+      ],
+      "overall": 78.0
+    },
+    "\u2212 Sleep Consolidation": {
+      "single_hop": [
+        7,
+        10
+      ],
+      "multi_hop": [
+        6,
+        6
+      ],
+      "temporal": [
+        3,
+        5
+      ],
+      "coherence": [
+        3,
+        5
+      ],
+      "cognitive": [
+        4,
+        5
+      ],
+      "overall": 74.0
+    },
+    "Minimal (hippocampus only)": {
+      "single_hop": [
+        7,
+        10
+      ],
+      "multi_hop": [
+        6,
+        6
+      ],
+      "temporal": [
+        3,
+        5
+      ],
+      "coherence": [
+        3,
+        5
+      ],
+      "cognitive": [
+        4,
+        5
+      ],
+      "overall": 74.0
+    }
+  }
+}

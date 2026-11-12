@@ -4,7 +4,27 @@
 
 ---
 
-## v0.8.0 (2026-10-12) — World Model + Multi-Agent Platform + CI Green
+## v0.11.1 (2026-11-12) — Research Documentation + Ablation Study + Mathematical Proofs
+
+**586 tests | LoCoMo 78% | 39 modules | ~12,900 lines | Ablation ✅**
+
+### Research Documentation Overhaul
+| Document | Changes |
+|:---------|:--------|
+| `02_mathematics.md` | Added 7 original theorems with proofs: IB advantage (Thm 1), RL convergence (Thm 2), entropy consolidation (Thm 3), hypergraph efficiency (Thm 4), Hopfield capacity (Thm 5), capacity-accuracy crossover (Thm 6), sleep as rate-distortion (Thm 7). Added empirical findings summary. |
+| `03_architecture.md` | Added §11: 8 new module descriptions (temporal invalidation, belief entropy, associative network, PEC2F, entropy monitor, RL policy, RL gate, hypergraph). Added §12: 18-step encode pipeline. Added §13: full 39-module inventory with line counts. |
+| `05_benchmarks.md` | Complete rewrite: verified LoCoMo 78% with per-category breakdown, comparison table vs GPT-4/RAG/Mem0/Zep, ablation table, honest assessment, failure analysis. |
+| `08_references.md` | Added 30+ new citations: Information theory (Tishby, Shannon), Modern Hopfield (Ramsauer), RL memory (MemAgent, Mem-α, Memory-R1, AgeMem, ReMemR1), sleep (Born, Walker, Tononi), cognitive systems (MemoryOS, CogMem, HGMem). Key equations table. |
+
+### Ablation Study (Experiment 11) — Rewritten & Verified
+- **Complete rewrite** of `experiments/11_ablation_study.py` to use the actual LoCoMo benchmark infrastructure (identical test data and scoring as experiment 07)
+- Results: Neuromodulation and Sleep Consolidation each contribute 4.0pp to the overall score
+- Per-category analysis shows both affect the Coherence category (80%→60%)
+- JSON results saved to `experiments/results/11_ablation_results.json`
+
+---
+
+## v0.11.0 (2026-11-11) — RL Memory Policy + Hypergraph + Entropy Monitor
 
 **361 tests | HCSI 1.00 | 35 modules | ~12,500 lines | CI ✅**
 
